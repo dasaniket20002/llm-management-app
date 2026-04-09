@@ -4,13 +4,11 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
-import Footer from '../components/Footer'
-import Header from '../components/Header'
 
 import TanStackQueryDevtools from '../lib/client/integrations/tanstack-query/devtools'
 import TanStackRouterDevtools from '../lib/client/integrations/tanstack-router/devtools'
 
-import appCss from '../styles.css?url'
+import appCss from '../styles/styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -52,9 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
         {children}
-        <Footer />
         <TanStackDevtools
           plugins={[TanStackRouterDevtools, TanStackQueryDevtools]}
         />
