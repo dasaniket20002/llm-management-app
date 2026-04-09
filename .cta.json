@@ -1,0 +1,27 @@
+{
+  "projectName": "management-prisma-tanstack-db",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "bun",
+  "includeExamples": false,
+  "tailwind": true,
+  "addOnOptions": {
+    "prisma": {
+      "database": "postgres"
+    }
+  },
+  "envVarValues": {},
+  "git": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "eslint",
+    "prisma",
+    "compiler",
+    "db",
+    "t3env",
+    "better-auth",
+    "tanstack-query"
+  ]
+}
