@@ -7,8 +7,268 @@ datasource db {
   provider = "postgresql"
 }
 
-model Todo {
-  id        Int      @id @default(autoincrement())
-  title     String
-  createdAt DateTime @default(now())
+enum Visibility {
+  public
+  private
+
+  @@map("visibility")
+}
+
+enum ResourceType {
+  file
+  organization
+  user
+
+  @@map("resource_type")
+}
+
+enum StorageType {
+  user
+  organization
+
+  @@map("storage_type")
+}
+
+enum UserOrgStatus {
+  invited
+  requested
+  active
+  suspended
+  left
+}
+
+model Permission {
+  id              String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  action          String           @unique
+  description     String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model Role {
+  id          String                   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name        String                   @unique
+  description String?
+  isSystem    Boolean                  @default(false)
+  createdAt   DateTime                 @default(now()) @map("created_at")
+  updatedAt   DateTime                 @updatedAt @map("updated_at")
+  permissions RolePermission[]
+  assignments ResourceRoleAssignment[]
+
+  @@map("role")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id") @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String     @map("permission_id") @db.Uuid
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permission")
+}
+
+model ResourceRoleAssignment {
+  id                String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  //
+  targetResourceId  String    @map("resource_id") @db.Uuid
+  targerResource    Resource  @relation("AssignmentTargetResource", fields: [targetResourceId], references: [id], onDelete: Cascade)
+  //
+  roleId            String    @map("role_id") @db.Uuid
+  role              Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  //
+  subjectResourceId String    @map("subject_resource_id") @db.Uuid
+  subjectResource   Resource  @relation("AssignmentSubjectResource", fields: [subjectResourceId], references: [id], onDelete: Cascade)
+  //
+  // Metadata
+  grantedById       String?   @map("granted_by") @db.Uuid
+  grantedBy         User?     @relation("AssignmentGrantedBy", fields: [grantedById], references: [id], onDelete: SetNull)
+  isActive          Boolean   @default(true) @map("is_active")
+  expiresAt         DateTime? @map("expires_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@unique([subjectResourceId, targetResourceId, roleId])
+  @@index([isActive, expiresAt])
+  @@index([targetResourceId, subjectResourceId, isActive])
+  @@index([targetResourceId, roleId, isActive])
+  @@index([subjectResourceId, isActive])
+  @@index([targetResourceId, isActive])
+  @@index([expiresAt])
+  @@map("resource_role_assignments")
+}
+
+model Resource {
+  id                         String                   @id @default(dbgenerated("uuidv7()")) @map("id") @db.Uuid
+  createdById                String?                  @map("created_by_id") @db.Uuid
+  createdBy                  User?                    @relation("ResourceCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  resourceType               ResourceType             @map("resource_type")
+  visibility                 Visibility               @default(private)
+  createdAt                  DateTime                 @default(now()) @map("created_at")
+  updatedAt                  DateTime                 @updatedAt @map("updated_at")
+  file                       File?                    @relation("FileResource")
+  organization               Organization?            @relation("OrganizationResource")
+  users                      User?                    @relation("UserResource")
+  assignmentTargetResources  ResourceRoleAssignment[] @relation("AssignmentTargetResource")
+  assignmentSubjectResources ResourceRoleAssignment[] @relation("AssignmentSubjectResource")
+
+  @@index([createdById])
+  @@index([visibility])
+  @@index([resourceType])
+  @@index([resourceType, visibility])
+  @@map("resource")
+}
+
+model File {
+  id              String        @id @db.Uuid
+  originalName    String        @map("original_name")
+  displayName     String?       @map("display_name")
+  mimeType        String?       @map("mime_type")
+  extension       String?       @map("extension")
+  sizeBytes       BigInt?       @map("size_bytes")
+  checksumSha256  String?       @map("checksum_sha256")
+  storageKey      String        @unique @map("storage_key")
+  storageBucketId String        @map("storage_bucket_id") @db.Uuid
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  resource        Resource      @relation("FileResource", fields: [id], references: [id], onDelete: Cascade)
+  userImage       User?         @relation("UserAvatarImageFile")
+  orgImage        Organization? @relation("OrgAvatarImageFile")
+
+  @@index([storageBucketId])
+  @@index([checksumSha256])
+  @@index([storageKey])
+  @@index([mimeType])
+  @@index([storageBucketId, createdAt])
+  @@map("files")
+}
+
+model Organization {
+  id              String             @id @db.Uuid
+  name            String
+  identifier      String             @unique
+  imageFileId     String?            @unique @map("image_file_id") @db.Uuid
+  imageFile       File?              @relation("OrgAvatarImageFile", fields: [imageFileId], references: [id], onDelete: SetNull)
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+  resource        Resource           @relation("OrganizationResource", fields: [id], references: [id], onDelete: Cascade)
+  members         UserOrganization[]
+  sessions        Session[]          @relation("SessionOrganization")
+  storageBucketId String             @unique @map("storage_bucket_id") @db.Uuid
+
+  @@map("organization")
+}
+
+model UserOrganization {
+  id             String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  organizationId String        @map("organization_id") @db.Uuid
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String        @map("user_id") @db.Uuid
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         UserOrgStatus
+  joinedAt       DateTime?     @map("joined_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, status])
+  @@index([organizationId, userId, status])
+  @@map("user_organization")
+}
+
+model User {
+  id               String                   @id @map("id") @db.Uuid
+  name             String                   @map("name")
+  email            String                   @unique @map("email")
+  emailVerified    Boolean                  @default(false) @map("email_verified")
+  imageFileId      String?                  @unique @map("image_file_id") @db.Uuid
+  imageFile        File?                    @relation("UserAvatarImageFile", fields: [imageFileId], references: [id], onDelete: SetNull)
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+  username         String?                  @unique @map("username")
+  displayUsername  String?                  @map("display_username")
+  storageBucketId  String?                  @unique @map("storage_bucket_id") @db.Uuid
+  sessions         Session[]
+  accounts         Account[]
+  passkeys         Passkey[]
+  createdResources Resource[]               @relation("ResourceCreator")
+  organizations    UserOrganization[]
+  grantedRoles     ResourceRoleAssignment[] @relation("AssignmentGrantedBy")
+  resource         Resource                 @relation("UserResource", fields: [id], references: [id])
+
+  @@map("user")
+}
+
+model Session {
+  id             String        @id @default(dbgenerated("uuidv7()")) @map("id") @db.Uuid
+  expiresAt      DateTime      @map("expires_at")
+  token          String        @unique @map("token")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  ipAddress      String?       @map("ip_address")
+  userAgent      String?       @map("user_agent")
+  userId         String        @map("user_id") @db.Uuid
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?       @map("organization_id") @db.Uuid
+  organization   Organization? @relation("SessionOrganization", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(dbgenerated("uuidv7()")) @map("id") @db.Uuid
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id") @db.Uuid
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?   @map("scope")
+  password              String?   @map("password")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Passkey {
+  id           String    @id @default(dbgenerated("uuidv7()")) @map("id") @db.Uuid
+  name         String?   @map("name")
+  publicKey    String    @map("public_key")
+  userId       String    @map("user_id") @db.Uuid
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialID String    @map("credential_id")
+  counter      Int       @map("counter")
+  deviceType   String    @map("device_type")
+  backedUp     Boolean   @map("backed_up")
+  transports   String?   @map("transports")
+  createdAt    DateTime? @map("created_at")
+  aaguid       String?   @map("aaguid")
+
+  @@index([userId])
+  @@index([credentialID])
+  @@map("passkey")
+}
+
+model Verification {
+  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }

@@ -1,0 +1,27 @@
+import { Button } from '#/components/ui/button'
+import { authClient } from '#/lib/auth-client'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/_protected/main')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  const navigate = useNavigate()
+  return (
+    <div>
+      <p>Hello "/main"!</p>
+      <Button
+        onClick={() => {
+          authClient.signOut({
+            fetchOptions: {
+              onSuccess: () => navigate({ to: '/sign-in' }),
+            },
+          })
+        }}
+      >
+        Signout
+      </Button>
+    </div>
+  )
+}

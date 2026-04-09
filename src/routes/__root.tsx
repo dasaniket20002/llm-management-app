@@ -5,12 +5,14 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 
-import TanStackQueryDevtools from '../lib/client/integrations/tanstack-query/devtools'
-import TanStackRouterDevtools from '../lib/client/integrations/tanstack-router/devtools'
+import TanStackQueryDevtools from '#/lib/client/integrations/tanstack-query/devtools'
+import TanStackRouterDevtools from '#/lib/client/integrations/tanstack-router/devtools'
 
 import appCss from '../styles/styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { env } from '#/lib/utils/env'
+import { Toaster } from '#/components/ui/sonner'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -29,7 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: env.VITE_APP_TITLE,
       },
     ],
     links: [
@@ -51,6 +53,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <TanStackDevtools
           plugins={[TanStackRouterDevtools, TanStackQueryDevtools]}
         />

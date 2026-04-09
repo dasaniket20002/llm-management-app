@@ -9,13 +9,53 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnprotectedRouteImport } from './routes/_unprotected'
+import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PreprocessAccountSetupRouteImport } from './routes/preprocess/account-setup'
+import { Route as UnprotectedSignUpRouteImport } from './routes/_unprotected/sign-up'
+import { Route as UnprotectedSignInRouteImport } from './routes/_unprotected/sign-in'
+import { Route as ProtectedOrgSettingsRouteImport } from './routes/_protected/org-settings'
+import { Route as ProtectedMainRouteImport } from './routes/_protected/main'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 
+const UnprotectedRoute = UnprotectedRouteImport.update({
+  id: '/_unprotected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PreprocessAccountSetupRoute = PreprocessAccountSetupRouteImport.update({
+  id: '/preprocess/account-setup',
+  path: '/preprocess/account-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnprotectedSignUpRoute = UnprotectedSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => UnprotectedRoute,
+} as any)
+const UnprotectedSignInRoute = UnprotectedSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => UnprotectedRoute,
+} as any)
+const ProtectedOrgSettingsRoute = ProtectedOrgSettingsRouteImport.update({
+  id: '/org-settings',
+  path: '/org-settings',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedMainRoute = ProtectedMainRouteImport.update({
+  id: '/main',
+  path: '/main',
+  getParentRoute: () => ProtectedRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -25,38 +65,131 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/main': typeof ProtectedMainRoute
+  '/org-settings': typeof ProtectedOrgSettingsRoute
+  '/sign-in': typeof UnprotectedSignInRoute
+  '/sign-up': typeof UnprotectedSignUpRoute
+  '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/main': typeof ProtectedMainRoute
+  '/org-settings': typeof ProtectedOrgSettingsRoute
+  '/sign-in': typeof UnprotectedSignInRoute
+  '/sign-up': typeof UnprotectedSignUpRoute
+  '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_protected': typeof ProtectedRouteWithChildren
+  '/_unprotected': typeof UnprotectedRouteWithChildren
+  '/_protected/main': typeof ProtectedMainRoute
+  '/_protected/org-settings': typeof ProtectedOrgSettingsRoute
+  '/_unprotected/sign-in': typeof UnprotectedSignInRoute
+  '/_unprotected/sign-up': typeof UnprotectedSignUpRoute
+  '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/main'
+    | '/org-settings'
+    | '/sign-in'
+    | '/sign-up'
+    | '/preprocess/account-setup'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/main'
+    | '/org-settings'
+    | '/sign-in'
+    | '/sign-up'
+    | '/preprocess/account-setup'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_protected'
+    | '/_unprotected'
+    | '/_protected/main'
+    | '/_protected/org-settings'
+    | '/_unprotected/sign-in'
+    | '/_unprotected/sign-up'
+    | '/preprocess/account-setup'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProtectedRoute: typeof ProtectedRouteWithChildren
+  UnprotectedRoute: typeof UnprotectedRouteWithChildren
+  PreprocessAccountSetupRoute: typeof PreprocessAccountSetupRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_unprotected': {
+      id: '/_unprotected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof UnprotectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/preprocess/account-setup': {
+      id: '/preprocess/account-setup'
+      path: '/preprocess/account-setup'
+      fullPath: '/preprocess/account-setup'
+      preLoaderRoute: typeof PreprocessAccountSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_unprotected/sign-up': {
+      id: '/_unprotected/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof UnprotectedSignUpRouteImport
+      parentRoute: typeof UnprotectedRoute
+    }
+    '/_unprotected/sign-in': {
+      id: '/_unprotected/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof UnprotectedSignInRouteImport
+      parentRoute: typeof UnprotectedRoute
+    }
+    '/_protected/org-settings': {
+      id: '/_protected/org-settings'
+      path: '/org-settings'
+      fullPath: '/org-settings'
+      preLoaderRoute: typeof ProtectedOrgSettingsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/main': {
+      id: '/_protected/main'
+      path: '/main'
+      fullPath: '/main'
+      preLoaderRoute: typeof ProtectedMainRouteImport
+      parentRoute: typeof ProtectedRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -68,8 +201,39 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProtectedRouteChildren {
+  ProtectedMainRoute: typeof ProtectedMainRoute
+  ProtectedOrgSettingsRoute: typeof ProtectedOrgSettingsRoute
+}
+
+const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedMainRoute: ProtectedMainRoute,
+  ProtectedOrgSettingsRoute: ProtectedOrgSettingsRoute,
+}
+
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
+  ProtectedRouteChildren,
+)
+
+interface UnprotectedRouteChildren {
+  UnprotectedSignInRoute: typeof UnprotectedSignInRoute
+  UnprotectedSignUpRoute: typeof UnprotectedSignUpRoute
+}
+
+const UnprotectedRouteChildren: UnprotectedRouteChildren = {
+  UnprotectedSignInRoute: UnprotectedSignInRoute,
+  UnprotectedSignUpRoute: UnprotectedSignUpRoute,
+}
+
+const UnprotectedRouteWithChildren = UnprotectedRoute._addFileChildren(
+  UnprotectedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProtectedRoute: ProtectedRouteWithChildren,
+  UnprotectedRoute: UnprotectedRouteWithChildren,
+  PreprocessAccountSetupRoute: PreprocessAccountSetupRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

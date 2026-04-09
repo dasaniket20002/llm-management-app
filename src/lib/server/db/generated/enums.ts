@@ -9,7 +9,37 @@
 * 🟢 You can import this file directly.
 */
 
+export const Visibility = {
+  public: 'public',
+  private: 'private'
+} as const
+
+export type Visibility = (typeof Visibility)[keyof typeof Visibility]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const ResourceType = {
+  file: 'file',
+  organization: 'organization',
+  user: 'user'
+} as const
+
+export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType]
+
+
+export const StorageType = {
+  user: 'user',
+  organization: 'organization'
+} as const
+
+export type StorageType = (typeof StorageType)[keyof typeof StorageType]
+
+
+export const UserOrgStatus = {
+  invited: 'invited',
+  requested: 'requested',
+  active: 'active',
+  suspended: 'suspended',
+  left: 'left'
+} as const
+
+export type UserOrgStatus = (typeof UserOrgStatus)[keyof typeof UserOrgStatus]
