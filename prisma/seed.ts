@@ -5,7 +5,10 @@
 // ==========================================================================
 
 import { PrismaClient } from '#/lib/server/db/generated/client'
-import { PERMISSIONS, ROLES } from '#/lib/server/db/roles_permissions'
+import {
+  PERMISSIONS_DEFINATIONS,
+  ROLES_DEFINATIONS,
+} from '#/lib/server/db/roles_permissions'
 
 import { PrismaPg } from '@prisma/adapter-pg'
 
@@ -19,7 +22,7 @@ async function seed() {
   console.log('Seeding permissions...')
 
   // Upsert all permissions
-  for (const perm of PERMISSIONS) {
+  for (const perm of PERMISSIONS_DEFINATIONS) {
     await prisma.permission.upsert({
       where: { action: perm.action },
       create: { action: perm.action, description: perm.description },
@@ -27,7 +30,7 @@ async function seed() {
     })
   }
 
-  console.log(`${PERMISSIONS.length} permissions seeded`)
+  console.log(`${PERMISSIONS_DEFINATIONS.length} permissions seeded`)
 
   // Load all permissions for lookup
   const allPerms = await prisma.permission.findMany()
@@ -35,7 +38,7 @@ async function seed() {
 
   console.log('Seeding roles...')
 
-  for (const roleDef of ROLES) {
+  for (const roleDef of ROLES_DEFINATIONS) {
     const role = await prisma.role.upsert({
       where: { name: roleDef.name },
       create: {

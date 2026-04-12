@@ -22,15 +22,20 @@ import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import { Switch } from '#/components/ui/switch'
 import { useIsMobile } from '#/lib/client/hooks/use-mobile'
+import { ensureSession } from '#/lib/server/functions/auth.functions'
 import { organizationIdentifierAvailable } from '#/lib/server/functions/organization.functions'
 import { useForm } from '@tanstack/react-form'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
-export const Route = createFileRoute('/_protected/org-settings')({
+export const Route = createFileRoute('/preprocess/session-org-init')({
+  beforeLoad: async () => {
+    const data = await ensureSession()
+    if (data.data.session.organizationId) throw redirect({ to: '/main' })
+    return { session: data.data }
+  },
   component: RouteComponent,
-  ssr: false,
 })
 
 const createFormSchema = z.object({

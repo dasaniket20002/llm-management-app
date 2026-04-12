@@ -5,6 +5,9 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { env } from './utils/env'
+import { createUserResource } from './server/services/resource.services'
+import { createBucket } from './server/services/minio.services'
+import { checkPermission } from './server/services/permission.services'
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -58,38 +61,28 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          const resource = await prisma.resource.create({
-            data: {
-              resourceType: 'user',
-              visibility: 'public',
-            },
-            select: { id: true },
+          const resource = await createUserResource({
+            subjectRole: 'user_owner',
           })
-
-          const userOwnerRole = await prisma.role.findUnique({
-            where: { name: 'user_owner' },
-            select: { id: true },
-          })
-
-          if (!userOwnerRole)
-            throw new Error('Cannot create new user; Role not found.')
-
-          await prisma.resourceRoleAssignment.create({
-            data: {
-              subjectResourceId: resource.id,
-              targetResourceId: resource.id,
-              roleId: userOwnerRole.id,
-            },
-            select: { id: true },
-          })
-
           return {
             data: {
               id: resource.id,
               email: user.email,
               emailVerified: user.emailVerified,
               name: user.name,
+              image: user.image,
             },
+          }
+        },
+        after: async (user) => {
+          const hasPermission = await checkPermission({
+            subjectResourceId: user.id,
+            targetResourceId: user.id,
+            permission: 'user:bucket:create',
+          })
+
+          if (hasPermission) {
+            const bucketId = await createBucket(user.id)
           }
         },
       },

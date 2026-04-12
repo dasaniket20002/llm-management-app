@@ -1,347 +1,364 @@
-import type { ResourceType } from './generated/client'
+// Core principle:
+// SubjectResource has a Role on a TargetResource
+// Role grants a set of Permissions
+// Permission = Action on a ResourceType inside/owned-by the TargetResource
 
-export type PermissionActionTemplate = `${ResourceType}:${string}`
+import type { ResourceType } from './generated/enums'
 
-export const PERMISSIONS = [
-  // ============================================================================
-  // USER PERMISSIONS (Actions user can perform)
-  // ============================================================================
+export type PermissionActionTemplate = `${string}:${ResourceType}`
 
+export const PERMISSIONS_DEFINATIONS = [
+  // ===================================================================
+  // USER RESOURCE (self profile or members inside org scope)
+  // ===================================================================
   {
-    action: 'user:organization:create',
-    description: 'Create new organizations',
+    action: 'read:user',
+    description: 'View basic user profile',
   },
   {
-    action: 'user:organization:join',
-    description: 'Join organizations via invite',
-  },
-  { action: 'user:organization:leave', description: 'Leave organizations' },
-
-  { action: 'user:read:full', description: 'View user full profile' },
-  { action: 'user:read', description: 'View user restricted profile' },
-  { action: 'user:delete', description: 'Delete user account' },
-
-  { action: 'user:bucket:create', description: 'Create personal bucket' },
-  { action: 'user:update:name', description: 'Update display name' },
-  { action: 'user:update:username', description: 'Update username' },
-  { action: 'user:update:password', description: 'Update password' },
-  { action: 'user:update:avatar', description: 'Update profile picture' },
-
-  // ============================================================================
-  // ORGANIZATION PERMISSIONS
-  // ============================================================================
-
-  // Org - Settings
-  { action: 'organization:read', description: 'View organization details' },
-  {
-    action: 'organization:update',
-    description: 'Update organization settings',
-  },
-  { action: 'organization:delete', description: 'Delete organization' },
-
-  // Org - Members
-  {
-    action: 'organization:member:read',
-    description: 'View organization members',
-  },
-  { action: 'organization:member:invite', description: 'Invite new members' },
-  { action: 'organization:member:create', description: 'Create new members' },
-  {
-    action: 'organization:member:update',
-    description: 'Update member details',
+    action: 'read_full:user',
+    description: 'View full user profile (email, metadata, admin only)',
   },
   {
-    action: 'organization:member:remove',
-    description: 'Remove members from organization',
+    action: 'update_name:user',
+    description: 'Change display name',
   },
-
-  // Org - Roles & Permissions
   {
-    action: 'organization:role:read',
-    description: 'View roles and permissions',
+    action: 'update_username:user',
+    description: 'Change username',
   },
-  { action: 'organization:role:create', description: 'Create custom roles' },
   {
-    action: 'organization:role:update',
-    description: 'Update role permissions',
+    action: 'update_password:user',
+    description: 'Change password',
   },
-  { action: 'organization:role:delete', description: 'Delete custom roles' },
   {
-    action: 'organization:role:assign',
-    description: 'Assign roles to members',
+    action: 'update_avatar:user',
+    description: 'Change avatar',
+  },
+  {
+    action: 'create:user',
+    description: 'Create an user account',
+  },
+  {
+    action: 'delete:user',
+    description: 'Delete the user account',
+  },
+  {
+    action: 'create_bucket:user',
+    description: 'Create personal storage bucket (usually one-time)',
   },
 
-  // Org - Files/Folders
-  { action: 'organization:file:read', description: 'View files' },
-  { action: 'organization:file:create', description: 'Create files' },
-  { action: 'organization:file:update', description: 'Update file details' },
-  { action: 'organization:file:delete', description: 'Delete files' },
+  // ===================================================================
+  // ORGANIZATION RESOURCE (the org itself + global org actions)
+  // ===================================================================
+  {
+    action: 'create:organization',
+    description: 'Create a new organization (global permission)',
+  },
+  {
+    action: 'read:organization',
+    description: 'View organization details',
+  },
+  {
+    action: 'update:organization',
+    description: 'Update organization settings (name, billing, etc.)',
+  },
+  {
+    action: 'delete:organization',
+    description: 'Delete the entire organization',
+  },
+  {
+    action: 'join:organization',
+    description: 'Join an organization (via invite/link)',
+  },
+  {
+    action: 'leave:organization',
+    description: 'Leave an organization',
+  },
 
-  // ============================================================================
-  // FILE PERMISSIONS
-  // ============================================================================
+  // ===================================================================
+  // MEMBER MANAGEMENT (users inside an organization scope)
+  // ===================================================================
+  {
+    action: 'invite:user',
+    description: 'Invite new members to the organization',
+  },
+  {
+    action: 'remove:user',
+    description: 'Remove/kick members from the organization',
+  },
+  {
+    action: 'assign_role:user',
+    description: 'Assign roles to members in the organization',
+  },
 
-  { action: 'file:create', description: 'Upload new files' },
-  { action: 'file:read', description: 'View files' },
-  { action: 'file:update', description: 'Edit file content' },
-  { action: 'file:delete', description: 'Delete file' },
-  { action: 'file:move', description: 'Move file between buckets' },
-  { action: 'file:copy', description: 'Copy file' },
-  { action: 'file:rename', description: 'Rename file' },
-  { action: 'file:share', description: 'Share file' },
+  // ===================================================================
+  // CUSTOM ROLES MANAGEMENT (inside organization scope)
+  // ===================================================================
+  {
+    action: 'read_role:organization',
+    description: 'View custom roles & permissions',
+  },
+  {
+    action: 'create_role:organization',
+    description: 'Create new custom roles',
+  },
+  {
+    action: 'update_role:organization',
+    description: 'Edit custom role permissions',
+  },
+  {
+    action: 'delete_role:organization',
+    description: 'Delete custom roles',
+  },
+
+  // ===================================================================
+  // FILE RESOURCE (files inside organization scope OR personal scope OR specific file scope)
+  // ===================================================================
+  {
+    action: 'create:file',
+    description: 'Upload/create files in the scoped container',
+  },
+  {
+    action: 'read:file',
+    description: 'View/download files',
+  },
+  {
+    action: 'update:file',
+    description: 'Edit file content or metadata',
+  },
+  {
+    action: 'delete:file',
+    description: 'Delete files',
+  },
+  {
+    action: 'move:file',
+    description: 'Move files (including cross-bucket if allowed)',
+  },
+  {
+    action: 'copy:file',
+    description: 'Copy files',
+  },
+  {
+    action: 'rename:file',
+    description: 'Rename files',
+  },
+  {
+    action: 'share:file',
+    description: 'Generate share links or share with users/orgs',
+  },
 ] as const satisfies readonly {
   action: PermissionActionTemplate
   description: string
 }[]
 
-export type PermissionAction = (typeof PERMISSIONS)[number]['action']
+export type PermissionAction =
+  (typeof PERMISSIONS_DEFINATIONS)[number]['action']
 
-export const ROLES = [
+export const PERMISSION_ACTIONS = Object.fromEntries(
+  PERMISSIONS_DEFINATIONS.map((p) => [p.action, p.action]),
+) as { [K in PermissionAction]: K }
+
+export const ROLES_DEFINATIONS = [
   {
     name: 'super_admin',
-    description: 'Full access to everything across the platform',
-    permissions: [
-      'user:organization:create',
-      'user:organization:join',
-      'user:organization:leave',
-      'user:read:full',
-      'user:read',
-      'user:delete',
-      'user:bucket:create',
-      'user:update:name',
-      'user:update:username',
-      'user:update:password',
-      'user:update:avatar',
-      'organization:read',
-      'organization:update',
-      'organization:delete',
-      'organization:member:read',
-      'organization:member:invite',
-      'organization:member:create',
-      'organization:member:update',
-      'organization:member:remove',
-      'organization:role:read',
-      'organization:role:create',
-      'organization:role:update',
-      'organization:role:delete',
-      'organization:role:assign',
-      'organization:file:read',
-      'organization:file:create',
-      'organization:file:update',
-      'organization:file:delete',
-      'file:create',
-      'file:read',
-      'file:update',
-      'file:delete',
-      'file:move',
-      'file:copy',
-      'file:rename',
-      'file:share',
-    ],
+    description: 'God mode - full access to everything globally',
+    permissions: PERMISSIONS_DEFINATIONS.map((p) => p.action), // literally everything
   },
   {
     name: 'support_admin',
-    description: 'Support access for user and organization assistance',
+    description: 'Support team - read-most-things + light user fixes (global)',
     permissions: [
-      'user:read:full',
-      'user:read',
-      'user:update:name',
-      'user:update:username',
-      'user:update:avatar',
-      'organization:read',
-      'organization:member:read',
-      'organization:file:read',
-      'file:read',
+      'read_full:user',
+      'read:user',
+      'update_name:user',
+      'update_username:user',
+      'update_avatar:user',
+      'read:organization',
+      'read_role:organization',
+      'read:user', // members in any org
+      'read:file',
     ],
   },
   {
     name: 'org_owner',
-    description: 'Full control of an organization and its resources',
+    description:
+      'Complete owner of an organization (assigned on organization target)',
     permissions: [
-      'organization:read',
-      'organization:update',
-      'organization:delete',
-      'organization:member:read',
-      'organization:member:invite',
-      'organization:member:create',
-      'organization:member:update',
-      'organization:member:remove',
-      'organization:role:read',
-      'organization:role:create',
-      'organization:role:update',
-      'organization:role:delete',
-      'organization:role:assign',
-      'organization:file:read',
-      'organization:file:create',
-      'organization:file:update',
-      'organization:file:delete',
-      'file:create',
-      'file:read',
-      'file:update',
-      'file:delete',
-      'file:move',
-      'file:copy',
-      'file:rename',
-      'file:share',
-      'user:read:full',
-      'user:read',
-      'user:organization:join',
-      'user:organization:leave',
-      'user:update:name',
-      'user:update:username',
-      'user:update:avatar',
+      // Org itself
+      'read:organization',
+      'update:organization',
+      'delete:organization',
+
+      // Members
+      'invite:user',
+      'create:user', // create managed users for organization
+      'remove:user',
+
+      'assign_role:user',
+
+      // Custom roles
+      'read_role:organization',
+      'create_role:organization',
+      'update_role:organization',
+      'delete_role:organization',
+
+      // Files in this org
+      'create:file',
+      'read:file',
+      'update:file',
+      'delete:file',
+      'move:file',
+      'copy:file',
+      'rename:file',
+      'share:file',
     ],
   },
   {
     name: 'org_admin',
-    description: 'Administrative access without organization deletion',
+    description:
+      'Administrator of an organization - cannot delete org or custom roles',
     permissions: [
-      'organization:read',
-      'organization:update',
-      'organization:member:read',
-      'organization:member:invite',
-      'organization:member:create',
-      'organization:member:update',
-      'organization:member:remove',
-      'organization:role:read',
-      'organization:role:create',
-      'organization:role:update',
-      'organization:role:assign',
-      'organization:file:read',
-      'organization:file:create',
-      'organization:file:update',
-      'organization:file:delete',
-      'file:create',
-      'file:read',
-      'file:update',
-      'file:delete',
-      'file:move',
-      'file:copy',
-      'file:rename',
-      'file:share',
-      'user:read:full',
-      'user:read',
-      'user:organization:join',
-      'user:organization:leave',
-      'user:update:name',
-      'user:update:username',
-      'user:update:avatar',
+      'read:organization',
+      'update:organization',
+
+      'invite:user',
+      'remove:user',
+      'create:user', // create managed users for organization
+
+      'assign_role:user',
+
+      'read_role:organization',
+      'create_role:organization',
+      'update_role:organization',
+
+      'create:file',
+      'read:file',
+      'update:file',
+      'delete:file',
+      'move:file',
+      'copy:file',
+      'rename:file',
+      'share:file',
     ],
   },
   {
     name: 'org_member',
-    description: 'Basic member access inside an organization',
+    description: 'Standard member - can upload own files and view everything',
     permissions: [
-      'organization:read',
-      'organization:member:read',
-      'organization:file:read',
-      'file:create',
-      'file:read',
-      'user:read',
-      'user:organization:join',
-      'user:organization:leave',
-      'user:update:name',
-      'user:update:username',
-      'user:update:avatar',
+      'read:organization',
+      'read:user',
+      'read_role:organization',
+
+      'create:file',
+      'read:file',
+      'update:file',
     ],
   },
   {
     name: 'org_viewer',
-    description: 'Read-only access to organization data',
+    description: 'Read-only access to organization content',
     permissions: [
-      'organization:read',
-      'organization:member:read',
-      'organization:file:read',
-      'file:read',
-      'user:read',
+      'read:organization',
+      'read:user',
+      'read_role:organization',
+      'read:file',
     ],
   },
   {
     name: 'file_owner',
-    description: 'Full control of a file',
+    description: 'Full control over a specific file (assigned on file target)',
     permissions: [
-      'file:read',
-      'file:update',
-      'file:delete',
-      'file:move',
-      'file:copy',
-      'file:rename',
-      'file:share',
+      'read:file',
+      'update:file',
+      'delete:file',
+      'move:file',
+      'copy:file',
+      'rename:file',
+      'share:file',
     ],
   },
   {
     name: 'file_editor',
-    description: 'Can read and modify a file',
+    description: 'Can edit a specific file but not delete or share',
     permissions: [
-      'file:read',
-      'file:update',
-      'file:move',
-      'file:copy',
-      'file:rename',
+      'read:file',
+      'update:file',
+      'move:file',
+      'copy:file',
+      'rename:file',
     ],
   },
   {
     name: 'file_viewer',
-    description: 'Read-only access to a file',
-    permissions: ['file:read'],
+    description: 'Read-only access to a specific file',
+    permissions: ['read:file'],
   },
   {
     name: 'user_owner',
-    description: 'Full control over own account and profile',
+    description:
+      'Standard authenticated user rights over own account & personal storage (assigned on own user resource)',
     permissions: [
-      'user:read:full',
-      'user:read',
-      'user:delete',
-      'user:bucket:create',
-      'user:update:name',
-      'user:update:username',
-      'user:update:password',
-      'user:update:avatar',
-      'user:organization:create',
-      'user:organization:join',
-      'user:organization:leave',
-      'file:create',
+      'read:user',
+      'read_full:user',
+      'update_name:user',
+      'update_username:user',
+      'update_password:user',
+      'update_avatar:user',
+      'delete:user',
+      'create_bucket:user',
+
+      // Personal files (target = own user resource)
+      'create:file',
+      'read:file',
+      'update:file',
+      'delete:file',
+      'move:file',
+      'copy:file',
+      'rename:file',
+      'share:file',
+
+      // Global actions every real user should have
+      'create:organization',
+      'join:organization',
+      'leave:organization',
     ],
   },
   {
     name: 'user_managed',
-    description: 'Managed user account with limited self-service access',
+    description: 'SCIM/managed user - limited self-service',
     permissions: [
-      'user:read',
-      'user:update:name',
-      'user:update:password',
-      'user:update:avatar',
-      'user:organization:join',
-      'user:organization:leave',
+      'read_full:user',
+      'update_name:user',
+      'update_password:user',
+      'update_avatar:user',
     ],
-  },
-  {
-    name: 'user_viewer',
-    description: 'Read-only profile access',
-    permissions: ['user:read'],
-  },
-  {
-    name: 'guest',
-    description: 'Unauthenticated or minimal access',
-    permissions: [],
   },
   {
     name: 'external_collaborator',
-    description: 'Limited cross-org collaboration access',
+    description:
+      'Guest from another org - limited access (usually assigned on shared files or org)',
     permissions: [
-      'organization:read',
-      'organization:member:read',
-      'organization:file:read',
-      'file:read',
-      'file:update',
-      'file:copy',
-      'user:read',
+      'read:organization',
+      'read:user',
+      'read:file',
+      'update:file', // can edit shared files
+      'copy:file',
     ],
   },
-] as const satisfies {
+  {
+    name: 'guest',
+    description: 'Unauthenticated or public share link access',
+    permissions: [],
+  },
+] as const satisfies readonly {
   name: string
   description: string
   permissions: readonly PermissionAction[]
 }[]
 
-export type Roles = (typeof ROLES)[number]['name']
+export type Role = (typeof ROLES_DEFINATIONS)[number]['name']
+
+export const ROLES = Object.fromEntries(
+  ROLES_DEFINATIONS.map((r) => [r.name, r.name]),
+) as { [K in Role]: K }

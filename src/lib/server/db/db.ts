@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 import { PrismaClient } from './generated/client'
 import type { DefaultArgs } from '@prisma/client/runtime/client'
+import { Client as MinioClient } from 'minio'
 
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
@@ -34,3 +35,11 @@ export const generateTxId = async (tx: PrismaTransaction) => {
 
   return Number(result[0].txid_current)
 }
+
+export const minio = new MinioClient({
+  endPoint: env.MINIO_ENDPOINT,
+  port: env.MINIO_PORT,
+  useSSL: false,
+  accessKey: env.MINIO_ROOT_USER,
+  secretKey: env.MINIO_ROOT_PASSWORD,
+})

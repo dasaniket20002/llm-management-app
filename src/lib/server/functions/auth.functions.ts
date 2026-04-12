@@ -1,80 +1,63 @@
+import { auth } from '#/lib/auth'
+import { serverFnSuccessResponse } from '#/lib/types/server-fn'
+import { redirect } from '@tanstack/react-router'
 import { createMiddleware, createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import { redirect } from '@tanstack/react-router'
-import { auth } from '#/lib/auth'
-import { serializeError } from '#/lib/utils/utils'
 import { prisma } from '../db/db'
-import {
-  serverFnErrorResponse,
-  serverFnSuccessResponse,
-} from '#/lib/types/server-fn'
 
 export const getSession = createServerFn({ method: 'GET' }).handler(
   async () => {
-    try {
-      const headers = getRequestHeaders()
-      const session = await auth.api.getSession({ headers })
+    const headers = getRequestHeaders()
+    const session = await auth.api.getSession({ headers })
 
-      return serverFnSuccessResponse('Success', session)
-    } catch (e) {
-      console.error(e)
-      return serverFnErrorResponse('Internal Error', {
-        error: serializeError(e),
-      })
-    }
+    return serverFnSuccessResponse('Success', session)
   },
 )
 
 export const ensureSession = createServerFn({ method: 'GET' }).handler(
   async () => {
-    try {
-      const headers = getRequestHeaders()
-      const session = await auth.api.getSession({ headers })
+    const headers = getRequestHeaders()
+    const session = await auth.api.getSession({ headers })
 
-      if (!session) return serverFnErrorResponse('Not Found', null)
+    if (!session) throw redirect({ to: '/sign-in' })
 
-      return serverFnSuccessResponse('Found', session)
-    } catch (e) {
-      console.error(e)
-      return serverFnErrorResponse('Internal Error', {
-        error: serializeError(e),
-      })
-    }
+    return serverFnSuccessResponse('Found', session)
   },
 )
 
 export const updateSessionOrganization = createServerFn({ method: 'POST' })
   .inputValidator((data: { organizationId: string | null | undefined }) => data)
   .handler(async ({ data }) => {
-    try {
-      const headers = getRequestHeaders()
+    const headers = getRequestHeaders()
 
-      const session = await auth.api.updateSession({
-        body: { organizationId: data.organizationId },
-        headers,
-      })
+    const session = await auth.api.updateSession({
+      body: { organizationId: data.organizationId },
+      headers,
+    })
 
-      return serverFnSuccessResponse('Found', session)
-    } catch (e) {
-      console.error(e)
-      return serverFnErrorResponse('Internal Error', {
-        error: serializeError(e),
-      })
-    }
+    return serverFnSuccessResponse('Found', session)
   })
 
-export const authMiddleware = createMiddleware().server(
-  async ({ next, pathname }) => {
-    const sessionData = await ensureSession()
-    if (!sessionData.success) throw redirect({ to: '/sign-in' })
-    if (
-      !pathname.endsWith('/org-settings') &&
-      !sessionData.data.session.organizationId
-    )
-      throw redirect({ to: '/org-settings' })
+export const authMiddleware = createMiddleware().server(async ({ next }) => {
+  const sessionData = await getSession()
+  const session = sessionData.data
+  if (!session) throw redirect({ to: '/sign-in' })
 
+  return next({ context: { session, prisma } })
+})
+
+export const authMiddlewareWithOrganization = createMiddleware()
+  .middleware([authMiddleware])
+  .server(async ({ next, context }) => {
+    const organizationId = context.session.session.organizationId
+    if (!organizationId) throw redirect({ to: '/preprocess/session-org-init' })
     return next({
-      context: { sessionData: sessionData.data, prisma },
+      context: {
+        session: {
+          ...context.session,
+          session: { ...context.session.session, organizationId },
+        },
+        prisma,
+      },
     })
-  },
-)
+  })

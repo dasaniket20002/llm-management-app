@@ -98,6 +98,7 @@ export const RoleScalarFieldEnum = {
   name: 'name',
   description: 'description',
   isSystem: 'isSystem',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -148,7 +149,6 @@ export const FileScalarFieldEnum = {
   mimeType: 'mimeType',
   extension: 'extension',
   sizeBytes: 'sizeBytes',
-  checksumSha256: 'checksumSha256',
   storageKey: 'storageKey',
   storageBucketId: 'storageBucketId',
   createdAt: 'createdAt',
@@ -189,6 +189,7 @@ export const UserScalarFieldEnum = {
   name: 'name',
   email: 'email',
   emailVerified: 'emailVerified',
+  image: 'image',
   imageFileId: 'imageFileId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

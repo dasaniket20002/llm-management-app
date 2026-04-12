@@ -59,7 +59,7 @@ function RouteComponent() {
           onResponse: () => setSubmitting(false),
           onSuccess: () => {
             toast.success('Signed in successfully')
-            navigate({ to: '/org-settings' })
+            navigate({ to: '/preprocess/account-setup' })
           },
           onError: ({ error }) => {
             toast.error(error.message)
@@ -181,7 +181,7 @@ function RouteComponent() {
                         await authClient.signIn.social({
                           requestSignUp: true,
                           provider: 'google',
-                          callbackURL: '/org-settings',
+                          callbackURL: '/preprocess/account-setup',
                           fetchOptions: {
                             onRequest: () => setSubmitting(true),
                             onResponse: () => setSubmitting(false),
@@ -221,7 +221,7 @@ function RouteComponent() {
                             onRequest: () => setSubmitting(true),
                             onResponse: () => setSubmitting(false),
                             onSuccess: () => {
-                              navigate({ to: '/org-settings' })
+                              navigate({ to: '/preprocess/account-setup' })
                             },
                             onError: ({ error }) => {
                               toast.error(error.message)

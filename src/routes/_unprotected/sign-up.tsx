@@ -45,8 +45,8 @@ export const Route = createFileRoute('/_unprotected/sign-up')({
 })
 
 function RouteComponent() {
-  const [submitting, setSubmitting] = useState<boolean>(false)
   const navigate = useNavigate()
+  const [submitting, setSubmitting] = useState<boolean>(false)
   const form = useForm({
     defaultValues: {
       firstName: '',
@@ -71,7 +71,7 @@ function RouteComponent() {
           onResponse: () => setSubmitting(false),
           onSuccess: () => {
             toast.success('Signed up successfully')
-            navigate({ to: '/org-settings' })
+            navigate({ to: '/preprocess/account-setup' })
           },
           onError: ({ error }) => {
             toast.error(error.message)
@@ -288,7 +288,7 @@ function RouteComponent() {
                         await authClient.signIn.social({
                           requestSignUp: true,
                           provider: 'google',
-                          callbackURL: '/org-settings',
+                          callbackURL: '/preprocess/account-setup',
                           fetchOptions: {
                             onRequest: () => setSubmitting(true),
                             onResponse: () => setSubmitting(false),

@@ -12,12 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnprotectedRouteImport } from './routes/_unprotected'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PreprocessSessionOrgInitRouteImport } from './routes/preprocess/session-org-init'
 import { Route as PreprocessAccountSetupRouteImport } from './routes/preprocess/account-setup'
 import { Route as UnprotectedSignUpRouteImport } from './routes/_unprotected/sign-up'
 import { Route as UnprotectedSignInRouteImport } from './routes/_unprotected/sign-in'
-import { Route as ProtectedOrgSettingsRouteImport } from './routes/_protected/org-settings'
 import { Route as ProtectedMainRouteImport } from './routes/_protected/main'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as ProtectedApiElectricSelfOwnedResourcesRouteImport } from './routes/_protected/api/electric/self-owned-resources'
+import { Route as ProtectedApiElectricResourceRoleAssignmentRouteImport } from './routes/_protected/api/electric/resource-role-assignment'
 
 const UnprotectedRoute = UnprotectedRouteImport.update({
   id: '/_unprotected',
@@ -32,6 +34,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreprocessSessionOrgInitRoute =
+  PreprocessSessionOrgInitRouteImport.update({
+    id: '/preprocess/session-org-init',
+    path: '/preprocess/session-org-init',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PreprocessAccountSetupRoute = PreprocessAccountSetupRouteImport.update({
   id: '/preprocess/account-setup',
   path: '/preprocess/account-setup',
@@ -47,11 +55,6 @@ const UnprotectedSignInRoute = UnprotectedSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => UnprotectedRoute,
 } as any)
-const ProtectedOrgSettingsRoute = ProtectedOrgSettingsRouteImport.update({
-  id: '/org-settings',
-  path: '/org-settings',
-  getParentRoute: () => ProtectedRoute,
-} as any)
 const ProtectedMainRoute = ProtectedMainRouteImport.update({
   id: '/main',
   path: '/main',
@@ -62,24 +65,40 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedApiElectricSelfOwnedResourcesRoute =
+  ProtectedApiElectricSelfOwnedResourcesRouteImport.update({
+    id: '/api/electric/self-owned-resources',
+    path: '/api/electric/self-owned-resources',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedApiElectricResourceRoleAssignmentRoute =
+  ProtectedApiElectricResourceRoleAssignmentRouteImport.update({
+    id: '/api/electric/resource-role-assignment',
+    path: '/api/electric/resource-role-assignment',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/main': typeof ProtectedMainRoute
-  '/org-settings': typeof ProtectedOrgSettingsRoute
   '/sign-in': typeof UnprotectedSignInRoute
   '/sign-up': typeof UnprotectedSignUpRoute
   '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
+  '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
+  '/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/main': typeof ProtectedMainRoute
-  '/org-settings': typeof ProtectedOrgSettingsRoute
   '/sign-in': typeof UnprotectedSignInRoute
   '/sign-up': typeof UnprotectedSignUpRoute
   '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
+  '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
+  '/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,42 +106,50 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/_unprotected': typeof UnprotectedRouteWithChildren
   '/_protected/main': typeof ProtectedMainRoute
-  '/_protected/org-settings': typeof ProtectedOrgSettingsRoute
   '/_unprotected/sign-in': typeof UnprotectedSignInRoute
   '/_unprotected/sign-up': typeof UnprotectedSignUpRoute
   '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
+  '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_protected/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
+  '/_protected/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/main'
-    | '/org-settings'
     | '/sign-in'
     | '/sign-up'
     | '/preprocess/account-setup'
+    | '/preprocess/session-org-init'
     | '/api/auth/$'
+    | '/api/electric/resource-role-assignment'
+    | '/api/electric/self-owned-resources'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/main'
-    | '/org-settings'
     | '/sign-in'
     | '/sign-up'
     | '/preprocess/account-setup'
+    | '/preprocess/session-org-init'
     | '/api/auth/$'
+    | '/api/electric/resource-role-assignment'
+    | '/api/electric/self-owned-resources'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/_unprotected'
     | '/_protected/main'
-    | '/_protected/org-settings'
     | '/_unprotected/sign-in'
     | '/_unprotected/sign-up'
     | '/preprocess/account-setup'
+    | '/preprocess/session-org-init'
     | '/api/auth/$'
+    | '/_protected/api/electric/resource-role-assignment'
+    | '/_protected/api/electric/self-owned-resources'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,6 +157,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   UnprotectedRoute: typeof UnprotectedRouteWithChildren
   PreprocessAccountSetupRoute: typeof PreprocessAccountSetupRoute
+  PreprocessSessionOrgInitRoute: typeof PreprocessSessionOrgInitRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -156,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/preprocess/session-org-init': {
+      id: '/preprocess/session-org-init'
+      path: '/preprocess/session-org-init'
+      fullPath: '/preprocess/session-org-init'
+      preLoaderRoute: typeof PreprocessSessionOrgInitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/preprocess/account-setup': {
       id: '/preprocess/account-setup'
       path: '/preprocess/account-setup'
@@ -177,13 +212,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnprotectedSignInRouteImport
       parentRoute: typeof UnprotectedRoute
     }
-    '/_protected/org-settings': {
-      id: '/_protected/org-settings'
-      path: '/org-settings'
-      fullPath: '/org-settings'
-      preLoaderRoute: typeof ProtectedOrgSettingsRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
     '/_protected/main': {
       id: '/_protected/main'
       path: '/main'
@@ -198,17 +226,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/api/electric/self-owned-resources': {
+      id: '/_protected/api/electric/self-owned-resources'
+      path: '/api/electric/self-owned-resources'
+      fullPath: '/api/electric/self-owned-resources'
+      preLoaderRoute: typeof ProtectedApiElectricSelfOwnedResourcesRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/api/electric/resource-role-assignment': {
+      id: '/_protected/api/electric/resource-role-assignment'
+      path: '/api/electric/resource-role-assignment'
+      fullPath: '/api/electric/resource-role-assignment'
+      preLoaderRoute: typeof ProtectedApiElectricResourceRoleAssignmentRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
 interface ProtectedRouteChildren {
   ProtectedMainRoute: typeof ProtectedMainRoute
-  ProtectedOrgSettingsRoute: typeof ProtectedOrgSettingsRoute
+  ProtectedApiElectricResourceRoleAssignmentRoute: typeof ProtectedApiElectricResourceRoleAssignmentRoute
+  ProtectedApiElectricSelfOwnedResourcesRoute: typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedMainRoute: ProtectedMainRoute,
-  ProtectedOrgSettingsRoute: ProtectedOrgSettingsRoute,
+  ProtectedApiElectricResourceRoleAssignmentRoute:
+    ProtectedApiElectricResourceRoleAssignmentRoute,
+  ProtectedApiElectricSelfOwnedResourcesRoute:
+    ProtectedApiElectricSelfOwnedResourcesRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
@@ -234,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   UnprotectedRoute: UnprotectedRouteWithChildren,
   PreprocessAccountSetupRoute: PreprocessAccountSetupRoute,
+  PreprocessSessionOrgInitRoute: PreprocessSessionOrgInitRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

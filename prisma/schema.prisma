@@ -53,6 +53,8 @@ model Role {
   name        String                   @unique
   description String?
   isSystem    Boolean                  @default(false)
+  createdById String?                  @map("created_by_id") @db.Uuid
+  createdBy   Resource?                @relation("CreatedRoles", fields: [createdById], references: [id])
   createdAt   DateTime                 @default(now()) @map("created_at")
   updatedAt   DateTime                 @updatedAt @map("updated_at")
   permissions RolePermission[]
@@ -76,7 +78,7 @@ model RolePermission {
 model ResourceRoleAssignment {
   id                String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   //
-  targetResourceId  String    @map("resource_id") @db.Uuid
+  targetResourceId  String    @map("target_resource_id") @db.Uuid
   targerResource    Resource  @relation("AssignmentTargetResource", fields: [targetResourceId], references: [id], onDelete: Cascade)
   //
   roleId            String    @map("role_id") @db.Uuid
@@ -113,9 +115,10 @@ model Resource {
   updatedAt                  DateTime                 @updatedAt @map("updated_at")
   file                       File?                    @relation("FileResource")
   organization               Organization?            @relation("OrganizationResource")
-  users                      User?                    @relation("UserResource")
+  user                       User?                    @relation("UserResource")
   assignmentTargetResources  ResourceRoleAssignment[] @relation("AssignmentTargetResource")
   assignmentSubjectResources ResourceRoleAssignment[] @relation("AssignmentSubjectResource")
+  createdRoles               Role[]                   @relation("CreatedRoles")
 
   @@index([createdById])
   @@index([visibility])
@@ -128,10 +131,9 @@ model File {
   id              String        @id @db.Uuid
   originalName    String        @map("original_name")
   displayName     String?       @map("display_name")
-  mimeType        String?       @map("mime_type")
-  extension       String?       @map("extension")
-  sizeBytes       BigInt?       @map("size_bytes")
-  checksumSha256  String?       @map("checksum_sha256")
+  mimeType        String        @map("mime_type")
+  extension       String        @map("extension")
+  sizeBytes       BigInt        @map("size_bytes")
   storageKey      String        @unique @map("storage_key")
   storageBucketId String        @map("storage_bucket_id") @db.Uuid
   createdAt       DateTime      @default(now()) @map("created_at")
@@ -141,7 +143,6 @@ model File {
   orgImage        Organization? @relation("OrgAvatarImageFile")
 
   @@index([storageBucketId])
-  @@index([checksumSha256])
   @@index([storageKey])
   @@index([mimeType])
   @@index([storageBucketId, createdAt])
@@ -187,6 +188,7 @@ model User {
   name             String                   @map("name")
   email            String                   @unique @map("email")
   emailVerified    Boolean                  @default(false) @map("email_verified")
+  image            String?                  @unique @map("image")
   imageFileId      String?                  @unique @map("image_file_id") @db.Uuid
   imageFile        File?                    @relation("UserAvatarImageFile", fields: [imageFileId], references: [id], onDelete: SetNull)
   createdAt        DateTime                 @default(now()) @map("created_at")

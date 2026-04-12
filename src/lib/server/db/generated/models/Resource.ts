@@ -193,9 +193,10 @@ export type ResourceWhereInput = {
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   file?: Prisma.XOR<Prisma.FileNullableScalarRelationFilter, Prisma.FileWhereInput> | null
   organization?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
-  users?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentListRelationFilter
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentListRelationFilter
+  createdRoles?: Prisma.RoleListRelationFilter
 }
 
 export type ResourceOrderByWithRelationInput = {
@@ -208,9 +209,10 @@ export type ResourceOrderByWithRelationInput = {
   createdBy?: Prisma.UserOrderByWithRelationInput
   file?: Prisma.FileOrderByWithRelationInput
   organization?: Prisma.OrganizationOrderByWithRelationInput
-  users?: Prisma.UserOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentOrderByRelationAggregateInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentOrderByRelationAggregateInput
+  createdRoles?: Prisma.RoleOrderByRelationAggregateInput
 }
 
 export type ResourceWhereUniqueInput = Prisma.AtLeast<{
@@ -226,9 +228,10 @@ export type ResourceWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   file?: Prisma.XOR<Prisma.FileNullableScalarRelationFilter, Prisma.FileWhereInput> | null
   organization?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
-  users?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentListRelationFilter
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentListRelationFilter
+  createdRoles?: Prisma.RoleListRelationFilter
 }, "id">
 
 export type ResourceOrderByWithAggregationInput = {
@@ -264,9 +267,10 @@ export type ResourceCreateInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedResourcesInput
   file?: Prisma.FileCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUncheckedCreateInput = {
@@ -278,9 +282,10 @@ export type ResourceUncheckedCreateInput = {
   updatedAt?: Date | string
   file?: Prisma.FileUncheckedCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUpdateInput = {
@@ -292,9 +297,10 @@ export type ResourceUpdateInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedResourcesNestedInput
   file?: Prisma.FileUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateInput = {
@@ -306,9 +312,10 @@ export type ResourceUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   file?: Prisma.FileUncheckedUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceCreateManyInput = {
@@ -335,6 +342,11 @@ export type ResourceUncheckedUpdateManyInput = {
   visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ResourceNullableScalarRelationFilter = {
+  is?: Prisma.ResourceWhereInput | null
+  isNot?: Prisma.ResourceWhereInput | null
 }
 
 export type ResourceScalarRelationFilter = {
@@ -377,6 +389,22 @@ export type ResourceListRelationFilter = {
 
 export type ResourceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ResourceCreateNestedOneWithoutCreatedRolesInput = {
+  create?: Prisma.XOR<Prisma.ResourceCreateWithoutCreatedRolesInput, Prisma.ResourceUncheckedCreateWithoutCreatedRolesInput>
+  connectOrCreate?: Prisma.ResourceCreateOrConnectWithoutCreatedRolesInput
+  connect?: Prisma.ResourceWhereUniqueInput
+}
+
+export type ResourceUpdateOneWithoutCreatedRolesNestedInput = {
+  create?: Prisma.XOR<Prisma.ResourceCreateWithoutCreatedRolesInput, Prisma.ResourceUncheckedCreateWithoutCreatedRolesInput>
+  connectOrCreate?: Prisma.ResourceCreateOrConnectWithoutCreatedRolesInput
+  upsert?: Prisma.ResourceUpsertWithoutCreatedRolesInput
+  disconnect?: Prisma.ResourceWhereInput | boolean
+  delete?: Prisma.ResourceWhereInput | boolean
+  connect?: Prisma.ResourceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResourceUpdateToOneWithWhereWithoutCreatedRolesInput, Prisma.ResourceUpdateWithoutCreatedRolesInput>, Prisma.ResourceUncheckedUpdateWithoutCreatedRolesInput>
 }
 
 export type ResourceCreateNestedOneWithoutAssignmentTargetResourcesInput = {
@@ -450,9 +478,9 @@ export type ResourceCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.ResourceWhereUniqueInput | Prisma.ResourceWhereUniqueInput[]
 }
 
-export type ResourceCreateNestedOneWithoutUsersInput = {
-  create?: Prisma.XOR<Prisma.ResourceCreateWithoutUsersInput, Prisma.ResourceUncheckedCreateWithoutUsersInput>
-  connectOrCreate?: Prisma.ResourceCreateOrConnectWithoutUsersInput
+export type ResourceCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ResourceCreateWithoutUserInput, Prisma.ResourceUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.ResourceCreateOrConnectWithoutUserInput
   connect?: Prisma.ResourceWhereUniqueInput
 }
 
@@ -477,12 +505,12 @@ export type ResourceUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.ResourceScalarWhereInput | Prisma.ResourceScalarWhereInput[]
 }
 
-export type ResourceUpdateOneRequiredWithoutUsersNestedInput = {
-  create?: Prisma.XOR<Prisma.ResourceCreateWithoutUsersInput, Prisma.ResourceUncheckedCreateWithoutUsersInput>
-  connectOrCreate?: Prisma.ResourceCreateOrConnectWithoutUsersInput
-  upsert?: Prisma.ResourceUpsertWithoutUsersInput
+export type ResourceUpdateOneRequiredWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ResourceCreateWithoutUserInput, Prisma.ResourceUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.ResourceCreateOrConnectWithoutUserInput
+  upsert?: Prisma.ResourceUpsertWithoutUserInput
   connect?: Prisma.ResourceWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ResourceUpdateToOneWithWhereWithoutUsersInput, Prisma.ResourceUpdateWithoutUsersInput>, Prisma.ResourceUncheckedUpdateWithoutUsersInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResourceUpdateToOneWithWhereWithoutUserInput, Prisma.ResourceUpdateWithoutUserInput>, Prisma.ResourceUncheckedUpdateWithoutUserInput>
 }
 
 export type ResourceUncheckedUpdateManyWithoutCreatedByNestedInput = {
@@ -499,6 +527,78 @@ export type ResourceUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.ResourceScalarWhereInput | Prisma.ResourceScalarWhereInput[]
 }
 
+export type ResourceCreateWithoutCreatedRolesInput = {
+  id?: string
+  resourceType: $Enums.ResourceType
+  visibility?: $Enums.Visibility
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedResourcesInput
+  file?: Prisma.FileCreateNestedOneWithoutResourceInput
+  organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
+  assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
+  assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+}
+
+export type ResourceUncheckedCreateWithoutCreatedRolesInput = {
+  id?: string
+  createdById?: string | null
+  resourceType: $Enums.ResourceType
+  visibility?: $Enums.Visibility
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  file?: Prisma.FileUncheckedCreateNestedOneWithoutResourceInput
+  organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
+  assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+}
+
+export type ResourceCreateOrConnectWithoutCreatedRolesInput = {
+  where: Prisma.ResourceWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResourceCreateWithoutCreatedRolesInput, Prisma.ResourceUncheckedCreateWithoutCreatedRolesInput>
+}
+
+export type ResourceUpsertWithoutCreatedRolesInput = {
+  update: Prisma.XOR<Prisma.ResourceUpdateWithoutCreatedRolesInput, Prisma.ResourceUncheckedUpdateWithoutCreatedRolesInput>
+  create: Prisma.XOR<Prisma.ResourceCreateWithoutCreatedRolesInput, Prisma.ResourceUncheckedCreateWithoutCreatedRolesInput>
+  where?: Prisma.ResourceWhereInput
+}
+
+export type ResourceUpdateToOneWithWhereWithoutCreatedRolesInput = {
+  where?: Prisma.ResourceWhereInput
+  data: Prisma.XOR<Prisma.ResourceUpdateWithoutCreatedRolesInput, Prisma.ResourceUncheckedUpdateWithoutCreatedRolesInput>
+}
+
+export type ResourceUpdateWithoutCreatedRolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.EnumResourceTypeFieldUpdateOperationsInput | $Enums.ResourceType
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedResourcesNestedInput
+  file?: Prisma.FileUpdateOneWithoutResourceNestedInput
+  organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
+  assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+}
+
+export type ResourceUncheckedUpdateWithoutCreatedRolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resourceType?: Prisma.EnumResourceTypeFieldUpdateOperationsInput | $Enums.ResourceType
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  file?: Prisma.FileUncheckedUpdateOneWithoutResourceNestedInput
+  organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
+  assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+}
+
 export type ResourceCreateWithoutAssignmentTargetResourcesInput = {
   id?: string
   resourceType: $Enums.ResourceType
@@ -508,8 +608,9 @@ export type ResourceCreateWithoutAssignmentTargetResourcesInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedResourcesInput
   file?: Prisma.FileCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUncheckedCreateWithoutAssignmentTargetResourcesInput = {
@@ -521,8 +622,9 @@ export type ResourceUncheckedCreateWithoutAssignmentTargetResourcesInput = {
   updatedAt?: Date | string
   file?: Prisma.FileUncheckedCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceCreateOrConnectWithoutAssignmentTargetResourcesInput = {
@@ -539,8 +641,9 @@ export type ResourceCreateWithoutAssignmentSubjectResourcesInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedResourcesInput
   file?: Prisma.FileCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUncheckedCreateWithoutAssignmentSubjectResourcesInput = {
@@ -552,8 +655,9 @@ export type ResourceUncheckedCreateWithoutAssignmentSubjectResourcesInput = {
   updatedAt?: Date | string
   file?: Prisma.FileUncheckedCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceCreateOrConnectWithoutAssignmentSubjectResourcesInput = {
@@ -581,8 +685,9 @@ export type ResourceUpdateWithoutAssignmentTargetResourcesInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedResourcesNestedInput
   file?: Prisma.FileUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateWithoutAssignmentTargetResourcesInput = {
@@ -594,8 +699,9 @@ export type ResourceUncheckedUpdateWithoutAssignmentTargetResourcesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   file?: Prisma.FileUncheckedUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUpsertWithoutAssignmentSubjectResourcesInput = {
@@ -618,8 +724,9 @@ export type ResourceUpdateWithoutAssignmentSubjectResourcesInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedResourcesNestedInput
   file?: Prisma.FileUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateWithoutAssignmentSubjectResourcesInput = {
@@ -631,8 +738,9 @@ export type ResourceUncheckedUpdateWithoutAssignmentSubjectResourcesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   file?: Prisma.FileUncheckedUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceCreateWithoutFileInput = {
@@ -643,9 +751,10 @@ export type ResourceCreateWithoutFileInput = {
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedResourcesInput
   organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUncheckedCreateWithoutFileInput = {
@@ -656,9 +765,10 @@ export type ResourceUncheckedCreateWithoutFileInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceCreateOrConnectWithoutFileInput = {
@@ -685,9 +795,10 @@ export type ResourceUpdateWithoutFileInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedResourcesNestedInput
   organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateWithoutFileInput = {
@@ -698,9 +809,10 @@ export type ResourceUncheckedUpdateWithoutFileInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceCreateWithoutOrganizationInput = {
@@ -711,9 +823,10 @@ export type ResourceCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedResourcesInput
   file?: Prisma.FileCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUncheckedCreateWithoutOrganizationInput = {
@@ -724,9 +837,10 @@ export type ResourceUncheckedCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   file?: Prisma.FileUncheckedCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceCreateOrConnectWithoutOrganizationInput = {
@@ -753,9 +867,10 @@ export type ResourceUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedResourcesNestedInput
   file?: Prisma.FileUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateWithoutOrganizationInput = {
@@ -766,9 +881,10 @@ export type ResourceUncheckedUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   file?: Prisma.FileUncheckedUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceCreateWithoutCreatedByInput = {
@@ -779,9 +895,10 @@ export type ResourceCreateWithoutCreatedByInput = {
   updatedAt?: Date | string
   file?: Prisma.FileCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceUncheckedCreateWithoutCreatedByInput = {
@@ -792,9 +909,10 @@ export type ResourceUncheckedCreateWithoutCreatedByInput = {
   updatedAt?: Date | string
   file?: Prisma.FileUncheckedCreateNestedOneWithoutResourceInput
   organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
-  users?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
+  user?: Prisma.UserUncheckedCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ResourceCreateOrConnectWithoutCreatedByInput = {
@@ -807,7 +925,7 @@ export type ResourceCreateManyCreatedByInputEnvelope = {
   skipDuplicates?: boolean
 }
 
-export type ResourceCreateWithoutUsersInput = {
+export type ResourceCreateWithoutUserInput = {
   id?: string
   resourceType: $Enums.ResourceType
   visibility?: $Enums.Visibility
@@ -818,9 +936,10 @@ export type ResourceCreateWithoutUsersInput = {
   organization?: Prisma.OrganizationCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleCreateNestedManyWithoutCreatedByInput
 }
 
-export type ResourceUncheckedCreateWithoutUsersInput = {
+export type ResourceUncheckedCreateWithoutUserInput = {
   id?: string
   createdById?: string | null
   resourceType: $Enums.ResourceType
@@ -831,11 +950,12 @@ export type ResourceUncheckedCreateWithoutUsersInput = {
   organization?: Prisma.OrganizationUncheckedCreateNestedOneWithoutResourceInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutTargerResourceInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedCreateNestedManyWithoutSubjectResourceInput
+  createdRoles?: Prisma.RoleUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
-export type ResourceCreateOrConnectWithoutUsersInput = {
+export type ResourceCreateOrConnectWithoutUserInput = {
   where: Prisma.ResourceWhereUniqueInput
-  create: Prisma.XOR<Prisma.ResourceCreateWithoutUsersInput, Prisma.ResourceUncheckedCreateWithoutUsersInput>
+  create: Prisma.XOR<Prisma.ResourceCreateWithoutUserInput, Prisma.ResourceUncheckedCreateWithoutUserInput>
 }
 
 export type ResourceUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -866,18 +986,18 @@ export type ResourceScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Resource"> | Date | string
 }
 
-export type ResourceUpsertWithoutUsersInput = {
-  update: Prisma.XOR<Prisma.ResourceUpdateWithoutUsersInput, Prisma.ResourceUncheckedUpdateWithoutUsersInput>
-  create: Prisma.XOR<Prisma.ResourceCreateWithoutUsersInput, Prisma.ResourceUncheckedCreateWithoutUsersInput>
+export type ResourceUpsertWithoutUserInput = {
+  update: Prisma.XOR<Prisma.ResourceUpdateWithoutUserInput, Prisma.ResourceUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.ResourceCreateWithoutUserInput, Prisma.ResourceUncheckedCreateWithoutUserInput>
   where?: Prisma.ResourceWhereInput
 }
 
-export type ResourceUpdateToOneWithWhereWithoutUsersInput = {
+export type ResourceUpdateToOneWithWhereWithoutUserInput = {
   where?: Prisma.ResourceWhereInput
-  data: Prisma.XOR<Prisma.ResourceUpdateWithoutUsersInput, Prisma.ResourceUncheckedUpdateWithoutUsersInput>
+  data: Prisma.XOR<Prisma.ResourceUpdateWithoutUserInput, Prisma.ResourceUncheckedUpdateWithoutUserInput>
 }
 
-export type ResourceUpdateWithoutUsersInput = {
+export type ResourceUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.EnumResourceTypeFieldUpdateOperationsInput | $Enums.ResourceType
   visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
@@ -888,9 +1008,10 @@ export type ResourceUpdateWithoutUsersInput = {
   organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
-export type ResourceUncheckedUpdateWithoutUsersInput = {
+export type ResourceUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resourceType?: Prisma.EnumResourceTypeFieldUpdateOperationsInput | $Enums.ResourceType
@@ -901,6 +1022,7 @@ export type ResourceUncheckedUpdateWithoutUsersInput = {
   organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceCreateManyCreatedByInput = {
@@ -919,9 +1041,10 @@ export type ResourceUpdateWithoutCreatedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   file?: Prisma.FileUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateWithoutCreatedByInput = {
@@ -932,9 +1055,10 @@ export type ResourceUncheckedUpdateWithoutCreatedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   file?: Prisma.FileUncheckedUpdateOneWithoutResourceNestedInput
   organization?: Prisma.OrganizationUncheckedUpdateOneWithoutResourceNestedInput
-  users?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
+  user?: Prisma.UserUncheckedUpdateOneWithoutResourceNestedInput
   assignmentTargetResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutTargerResourceNestedInput
   assignmentSubjectResources?: Prisma.ResourceRoleAssignmentUncheckedUpdateManyWithoutSubjectResourceNestedInput
+  createdRoles?: Prisma.RoleUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ResourceUncheckedUpdateManyWithoutCreatedByInput = {
@@ -953,11 +1077,13 @@ export type ResourceUncheckedUpdateManyWithoutCreatedByInput = {
 export type ResourceCountOutputType = {
   assignmentTargetResources: number
   assignmentSubjectResources: number
+  createdRoles: number
 }
 
 export type ResourceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignmentTargetResources?: boolean | ResourceCountOutputTypeCountAssignmentTargetResourcesArgs
   assignmentSubjectResources?: boolean | ResourceCountOutputTypeCountAssignmentSubjectResourcesArgs
+  createdRoles?: boolean | ResourceCountOutputTypeCountCreatedRolesArgs
 }
 
 /**
@@ -984,6 +1110,13 @@ export type ResourceCountOutputTypeCountAssignmentSubjectResourcesArgs<ExtArgs e
   where?: Prisma.ResourceRoleAssignmentWhereInput
 }
 
+/**
+ * ResourceCountOutputType without action
+ */
+export type ResourceCountOutputTypeCountCreatedRolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RoleWhereInput
+}
+
 
 export type ResourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -995,9 +1128,10 @@ export type ResourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdBy?: boolean | Prisma.Resource$createdByArgs<ExtArgs>
   file?: boolean | Prisma.Resource$fileArgs<ExtArgs>
   organization?: boolean | Prisma.Resource$organizationArgs<ExtArgs>
-  users?: boolean | Prisma.Resource$usersArgs<ExtArgs>
+  user?: boolean | Prisma.Resource$userArgs<ExtArgs>
   assignmentTargetResources?: boolean | Prisma.Resource$assignmentTargetResourcesArgs<ExtArgs>
   assignmentSubjectResources?: boolean | Prisma.Resource$assignmentSubjectResourcesArgs<ExtArgs>
+  createdRoles?: boolean | Prisma.Resource$createdRolesArgs<ExtArgs>
   _count?: boolean | Prisma.ResourceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resource"]>
 
@@ -1035,9 +1169,10 @@ export type ResourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdBy?: boolean | Prisma.Resource$createdByArgs<ExtArgs>
   file?: boolean | Prisma.Resource$fileArgs<ExtArgs>
   organization?: boolean | Prisma.Resource$organizationArgs<ExtArgs>
-  users?: boolean | Prisma.Resource$usersArgs<ExtArgs>
+  user?: boolean | Prisma.Resource$userArgs<ExtArgs>
   assignmentTargetResources?: boolean | Prisma.Resource$assignmentTargetResourcesArgs<ExtArgs>
   assignmentSubjectResources?: boolean | Prisma.Resource$assignmentSubjectResourcesArgs<ExtArgs>
+  createdRoles?: boolean | Prisma.Resource$createdRolesArgs<ExtArgs>
   _count?: boolean | Prisma.ResourceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ResourceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1053,9 +1188,10 @@ export type $ResourcePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     createdBy: Prisma.$UserPayload<ExtArgs> | null
     file: Prisma.$FilePayload<ExtArgs> | null
     organization: Prisma.$OrganizationPayload<ExtArgs> | null
-    users: Prisma.$UserPayload<ExtArgs> | null
+    user: Prisma.$UserPayload<ExtArgs> | null
     assignmentTargetResources: Prisma.$ResourceRoleAssignmentPayload<ExtArgs>[]
     assignmentSubjectResources: Prisma.$ResourceRoleAssignmentPayload<ExtArgs>[]
+    createdRoles: Prisma.$RolePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1461,9 +1597,10 @@ export interface Prisma__ResourceClient<T, Null = never, ExtArgs extends runtime
   createdBy<T extends Prisma.Resource$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   file<T extends Prisma.Resource$fileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$fileArgs<ExtArgs>>): Prisma.Prisma__FileClient<runtime.Types.Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   organization<T extends Prisma.Resource$organizationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$organizationArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  users<T extends Prisma.Resource$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$usersArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.Resource$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignmentTargetResources<T extends Prisma.Resource$assignmentTargetResourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$assignmentTargetResourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResourceRoleAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignmentSubjectResources<T extends Prisma.Resource$assignmentSubjectResourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$assignmentSubjectResourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResourceRoleAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdRoles<T extends Prisma.Resource$createdRolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resource$createdRolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1957,9 +2094,9 @@ export type Resource$organizationArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
- * Resource.users
+ * Resource.user
  */
-export type Resource$usersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Resource$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the User
    */
@@ -2021,6 +2158,30 @@ export type Resource$assignmentSubjectResourcesArgs<ExtArgs extends runtime.Type
   take?: number
   skip?: number
   distinct?: Prisma.ResourceRoleAssignmentScalarFieldEnum | Prisma.ResourceRoleAssignmentScalarFieldEnum[]
+}
+
+/**
+ * Resource.createdRoles
+ */
+export type Resource$createdRolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Role
+   */
+  select?: Prisma.RoleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Role
+   */
+  omit?: Prisma.RoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RoleInclude<ExtArgs> | null
+  where?: Prisma.RoleWhereInput
+  orderBy?: Prisma.RoleOrderByWithRelationInput | Prisma.RoleOrderByWithRelationInput[]
+  cursor?: Prisma.RoleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RoleScalarFieldEnum | Prisma.RoleScalarFieldEnum[]
 }
 
 /**

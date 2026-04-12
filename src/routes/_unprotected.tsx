@@ -1,11 +1,11 @@
-import { ensureSession } from '#/lib/server/functions/auth.functions'
+import { getSession } from '#/lib/server/functions/auth.functions'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_unprotected')({
   beforeLoad: async () => {
-    const data = await ensureSession()
+    const data = await getSession()
 
-    if (data.success) {
+    if (data.data) {
       throw redirect({ to: '/main' })
     }
   },

@@ -20,8 +20,8 @@ import { Input } from '#/components/ui/input'
 import { Spinner } from '#/components/ui/spinner'
 import { authClient } from '#/lib/auth-client'
 import { ensureSession } from '#/lib/server/functions/auth.functions'
-import { can } from '#/lib/server/functions/permission.functions'
 import {
+  isPasskeySet,
   isPasswordSet,
   isUsernameSet,
   setPassword,
@@ -55,33 +55,27 @@ const setupPasswordSchema = z
     path: ['confirmPassword'],
   })
 
-const searchParams = z.object({
-  passwordSet: z.boolean(),
-  usernameSet: z.boolean(),
-  passkeySet: z.boolean(),
-})
-
 export const Route = createFileRoute('/preprocess/account-setup')({
-  validateSearch: searchParams,
   beforeLoad: async () => {
     const data = await ensureSession()
-    if (!data.success) throw redirect({ to: '/sign-in' })
 
-    const permissions = await can({
-      data: {
-        subjectResourceId: data.data.user.id,
-        targetResourceId: data.data.user.id,
-        actions: ['user:update:username', 'user:update:password'],
-      },
-    })
+    const usernameSetPromise = isUsernameSet()
+    const passwordSetPromise = isPasswordSet()
+    const passkeySetPromise = isPasskeySet()
 
-    if (!permissions[0] && !permissions[1])
-      throw redirect({ to: '/org-settings' })
+    const [usernameSet, passwordSet, passkeySet] = await Promise.all([
+      usernameSetPromise,
+      passwordSetPromise,
+      passkeySetPromise,
+    ])
+
+    if (usernameSet.data && passwordSet.data) throw redirect({ to: '/main' })
 
     return {
       session: data.data,
-      usernameChangePermission: permissions[0],
-      passwordChangePermission: permissions[1],
+      usernameSet: usernameSet.data,
+      passwordSet: passwordSet.data,
+      passkeySet: passkeySet.data,
     }
   },
   component: RouteComponent,
@@ -89,9 +83,7 @@ export const Route = createFileRoute('/preprocess/account-setup')({
 
 function RouteComponent() {
   const navigate = useNavigate()
-  const { session, usernameChangePermission, passwordChangePermission } =
-    Route.useRouteContext()
-  const { passwordSet, usernameSet } = Route.useSearch()
+  const { session, passwordSet, usernameSet } = Route.useRouteContext()
 
   const [validatingRedirect, setValidatingRedirect] = useState(false)
   const continueNext = useCallback(async () => {
@@ -105,14 +97,11 @@ function RouteComponent() {
     ])
     setValidatingRedirect(false)
 
-    const shouldUpdateUsername = !_usernameSet.data && usernameChangePermission
-    const shouldUpdatePassword = !_passwordSet.data && passwordChangePermission
-
-    if (!shouldUpdateUsername && !shouldUpdatePassword)
+    if (!_usernameSet.data && !_passwordSet.data)
       toast.error('Please provide Username and Password')
-    else if (!shouldUpdateUsername) toast.error('Please provide Username')
-    else if (!shouldUpdatePassword) toast.error('Please provide Password')
-    else navigate({ to: '/org-settings' })
+    else if (!_usernameSet.data) toast.error('Please provide Username')
+    else if (!_passwordSet.data) toast.error('Please provide Password')
+    else navigate({ to: '/main' })
   }, [navigate])
 
   return (
@@ -136,8 +125,8 @@ function RouteComponent() {
             </CardHeader>
             <CardContent>
               <FieldGroup>
-                {!usernameSet && usernameChangePermission && <UsernameForm />}
-                {!passwordSet && passwordChangePermission && <PassowrdForm />}
+                {!usernameSet && <UsernameForm />}
+                {!passwordSet && <PassowrdForm />}
                 <Field className="grid grid-cols-[2fr_1fr] gap-x-4 gap-y-6 items-center">
                   <FieldLabel
                     className="gap-0.5 flex-col items-start cursor-pointer"
@@ -275,7 +264,7 @@ function UsernameForm() {
 }
 
 function PassowrdForm() {
-  const { passkeySet } = Route.useSearch()
+  const { passkeySet } = Route.useRouteContext()
   const [submitting, setSubmitting] = useState(false)
 
   const passwordForm = useForm({
