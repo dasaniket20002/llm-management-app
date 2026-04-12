@@ -5,7 +5,7 @@ import type { VariantProps } from 'class-variance-authority'
 import { cn } from '#/lib/utils/utils'
 import { Label } from '#/components/ui/label'
 import { Separator } from '#/components/ui/separator'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, XCircle } from 'lucide-react'
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
@@ -197,7 +197,7 @@ function FieldError({
     if (uniqueErrors.length == 1) {
       return (
         <span className="inline-flex gap-1.5 items-center">
-          <CheckCircle className="stroke-1 size-3" />
+          <XCircle className="stroke-1 size-3" />
           {uniqueErrors[0]?.message}
         </span>
       )

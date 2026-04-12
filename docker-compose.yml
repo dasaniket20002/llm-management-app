@@ -34,7 +34,7 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
       ELECTRIC_SECRET: ${ELECTRIC_SECRET}
-      ELECTRIC_FEATURE_FLAGS: ${ELECTRIC_FEATURE_FLAGS}
+      ELECTRIC_FEATURE_FLAGS: allow_subqueries,tagged_subqueries
     ports:
       - '5433:3000'
     volumes:

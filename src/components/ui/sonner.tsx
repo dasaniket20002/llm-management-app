@@ -1,13 +1,13 @@
-import { Toaster as Sonner } from 'sonner'
-import type { ToasterProps } from 'sonner'
+import { useAppContext } from '#/lib/client/contexts/app/app-context'
 import {
   CircleCheckIcon,
   InfoIcon,
-  TriangleAlertIcon,
-  OctagonXIcon,
   Loader2Icon,
+  OctagonXIcon,
+  TriangleAlertIcon,
 } from 'lucide-react'
-import { useAppContext } from '#/lib/client/contexts/app/app-context'
+import type { ToasterProps } from 'sonner'
+import { Toaster as Sonner } from 'sonner'
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme, toastPosition } = useAppContext()

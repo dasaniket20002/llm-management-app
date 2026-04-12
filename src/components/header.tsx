@@ -1,5 +1,18 @@
 import { Link } from '@tanstack/react-router'
-import { toast } from 'sonner'
+import {
+  ArrowDown,
+  ArrowDownLeft,
+  ArrowDownRight,
+  ArrowUp,
+  ArrowUpLeft,
+  ArrowUpRight,
+  EllipsisVertical,
+  GamepadDirectional,
+  Lightbulb,
+  LightbulbOff,
+  SunMoon,
+  Zap,
+} from 'lucide-react'
 import Logo from './logo'
 import { Button } from './ui/button'
 import { ButtonGroup } from './ui/button-group'
@@ -17,20 +30,6 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import {
-  ArrowDown,
-  ArrowDownLeft,
-  ArrowDownRight,
-  ArrowUp,
-  ArrowUpLeft,
-  ArrowUpRight,
-  EllipsisVertical,
-  GamepadDirectional,
-  Lightbulb,
-  LightbulbOff,
-  SunMoon,
-  Zap,
-} from 'lucide-react'
-import {
   THEMES,
   TOAST_POSITIONS,
   useAppContext,
@@ -38,6 +37,7 @@ import {
 
 const HeaderSettingsMenu = () => {
   const { theme, setTheme, toastPosition, setToastPosition } = useAppContext()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -94,12 +94,7 @@ const HeaderSettingsMenu = () => {
                   <DropdownMenuLabel>Select Position</DropdownMenuLabel>
                   <DropdownMenuRadioGroup
                     value={toastPosition}
-                    onValueChange={(v) => {
-                      setToastPosition(v)
-                      toast.success(
-                        `Toast Position set to ${v.replaceAll('-', ' ')}`,
-                      )
-                    }}
+                    onValueChange={setToastPosition}
                   >
                     {TOAST_POSITIONS.map((t, i) => (
                       <DropdownMenuRadioItem
