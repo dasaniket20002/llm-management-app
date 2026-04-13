@@ -93,12 +93,13 @@ export async function grantRoleService({
   expiresAt?: Date | null
   prisma: PrismaClient | PrismaTransaction
 }) {
-  const foundRole = await prisma.role.findUniqueOrThrow({
+  const foundRole = await prisma.role.findUnique({
     where: {
       name: role,
     },
     select: { id: true },
   })
+  if (!foundRole) throw new Error('Not Found')
 
   const res = await prisma.resourceRoleAssignment.upsert({
     where: {

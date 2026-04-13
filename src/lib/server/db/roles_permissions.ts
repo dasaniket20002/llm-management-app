@@ -8,9 +8,7 @@ import type { ResourceType } from './generated/enums'
 export type PermissionActionTemplate = `${string}:${ResourceType}`
 
 export const PERMISSIONS_DEFINATIONS = [
-  // ===================================================================
-  // USER RESOURCE (self profile or members inside org scope)
-  // ===================================================================
+  // USER RESOURCE
   {
     action: 'read:user',
     description: 'View basic user profile',
@@ -48,9 +46,7 @@ export const PERMISSIONS_DEFINATIONS = [
     description: 'Create personal storage bucket (usually one-time)',
   },
 
-  // ===================================================================
-  // ORGANIZATION RESOURCE (the org itself + global org actions)
-  // ===================================================================
+  // ORGANIZATION RESOURCE
   {
     action: 'create:organization',
     description: 'Create a new organization (global permission)',
@@ -76,9 +72,7 @@ export const PERMISSIONS_DEFINATIONS = [
     description: 'Leave an organization',
   },
 
-  // ===================================================================
-  // MEMBER MANAGEMENT (users inside an organization scope)
-  // ===================================================================
+  // MEMBER MANAGEMENT
   {
     action: 'invite:user',
     description: 'Invite new members to the organization',
@@ -92,9 +86,7 @@ export const PERMISSIONS_DEFINATIONS = [
     description: 'Assign roles to members in the organization',
   },
 
-  // ===================================================================
-  // CUSTOM ROLES MANAGEMENT (inside organization scope)
-  // ===================================================================
+  // ROLES MANAGEMENT
   {
     action: 'read_role:organization',
     description: 'View custom roles & permissions',
@@ -112,9 +104,7 @@ export const PERMISSIONS_DEFINATIONS = [
     description: 'Delete custom roles',
   },
 
-  // ===================================================================
-  // FILE RESOURCE (files inside organization scope OR personal scope OR specific file scope)
-  // ===================================================================
+  // FILE RESOURCE
   {
     action: 'create:file',
     description: 'Upload/create files in the scoped container',
@@ -163,7 +153,7 @@ export const ROLES_DEFINATIONS = [
   {
     name: 'super_admin',
     description: 'God mode - full access to everything globally',
-    permissions: PERMISSIONS_DEFINATIONS.map((p) => p.action), // literally everything
+    permissions: PERMISSIONS_DEFINATIONS.map((p) => p.action),
   },
   {
     name: 'support_admin',
@@ -176,7 +166,7 @@ export const ROLES_DEFINATIONS = [
       'update_avatar:user',
       'read:organization',
       'read_role:organization',
-      'read:user', // members in any org
+      'read:user',
       'read:file',
     ],
   },
@@ -185,25 +175,21 @@ export const ROLES_DEFINATIONS = [
     description:
       'Complete owner of an organization (assigned on organization target)',
     permissions: [
-      // Org itself
       'read:organization',
       'update:organization',
       'delete:organization',
 
-      // Members
       'invite:user',
-      'create:user', // create managed users for organization
+      'create:user',
       'remove:user',
 
       'assign_role:user',
 
-      // Custom roles
       'read_role:organization',
       'create_role:organization',
       'update_role:organization',
       'delete_role:organization',
 
-      // Files in this org
       'create:file',
       'read:file',
       'update:file',
@@ -224,7 +210,7 @@ export const ROLES_DEFINATIONS = [
 
       'invite:user',
       'remove:user',
-      'create:user', // create managed users for organization
+      'create:user',
 
       'assign_role:user',
 
@@ -308,7 +294,6 @@ export const ROLES_DEFINATIONS = [
       'delete:user',
       'create_bucket:user',
 
-      // Personal files (target = own user resource)
       'create:file',
       'read:file',
       'update:file',
@@ -318,7 +303,6 @@ export const ROLES_DEFINATIONS = [
       'rename:file',
       'share:file',
 
-      // Global actions every real user should have
       'create:organization',
       'join:organization',
       'leave:organization',
@@ -342,7 +326,7 @@ export const ROLES_DEFINATIONS = [
       'read:organization',
       'read:user',
       'read:file',
-      'update:file', // can edit shared files
+      'update:file',
       'copy:file',
     ],
   },
