@@ -3,7 +3,23 @@ import { minio } from '../db/db'
 
 const CHUNK_SIZE = 64 * 1024 * 1024
 
-export async function emptyBucket({ bucketId }: { bucketId: string }) {
+export async function createBucketService({
+  bucketPrefix,
+}: {
+  bucketPrefix: string
+}) {
+  let bucketId = ''
+  let exists = true
+  do {
+    bucketId = `${bucketPrefix.replaceAll('_', '-')}-${crypto.randomUUID()}`
+    exists = await minio.bucketExists(bucketId)
+  } while (exists)
+
+  await minio.makeBucket(bucketId)
+  return bucketId
+}
+
+export async function emptyBucketService({ bucketId }: { bucketId: string }) {
   const objectsStream = minio.listObjectsV2(bucketId, '', true)
 
   const objects: string[] = []
@@ -22,23 +38,34 @@ export async function emptyBucket({ bucketId }: { bucketId: string }) {
   return true
 }
 
-export async function createBucket({ bucketPrefix }: { bucketPrefix: string }) {
-  let bucketId = ''
-  let exists = true
-  do {
-    bucketId = `${bucketPrefix.replaceAll('_', '-')}-${crypto.randomUUID()}`
-    exists = await minio.bucketExists(bucketId)
-  } while (exists)
+export async function deleteBucketService({ bucketId }: { bucketId: string }) {
+  const exists = await minio.bucketExists(bucketId)
+  if (!exists) throw new Error('Not Found')
 
-  await minio.makeBucket(bucketId)
-  return bucketId
+  const emptiedBucket = await emptyBucketService({ bucketId })
+  if (emptiedBucket !== true) throw new Error(emptiedBucket.join(' | '))
+
+  await minio.removeBucket(bucketId)
 }
 
-export async function getPresignedPutUrl({
+export async function getPresignedGeteUrlService({
+  storageKey,
+  bucketId,
+  expireTime = 24 * 60 * 60, // 24 hours // 1 day
+}: {
+  storageKey: string
+  bucketId: string
+  expireTime?: number
+}) {
+  const url = await minio.presignedGetObject(bucketId, storageKey, expireTime)
+  return { url, storageKey, expireTime }
+}
+
+export async function getPresignedPutUrlService({
   originalName,
   extension,
   bucketId,
-  exipryTime = 60 * 60,
+  exipryTime = 60 * 60, // 1 hour
 }: {
   originalName: string
   extension: string
@@ -48,15 +75,15 @@ export async function getPresignedPutUrl({
   const objectName = `${originalName}-${crypto.randomUUID()}.${extension}`
   const url = await minio.presignedPutObject(bucketId, objectName, exipryTime)
 
-  return { url, objectName }
+  return { url, objectName, exipryTime }
 }
 
-export async function initiateMultipartUpload({
+export async function initiateMultipartUploadService({
   bucketId,
   originalName,
   extension,
   fileSize,
-  expiryTime = 60 * 60,
+  expiryTime = 60 * 60, // 1 hour
 }: {
   bucketId: string
   originalName: string
@@ -92,10 +119,10 @@ export async function initiateMultipartUpload({
     partUrls.push({ partNumber: i, url })
   }
 
-  return { uploadId, objectName, partUrls, partCount }
+  return { uploadId, objectName, partUrls, partCount, expiryTime }
 }
 
-export async function completeMultipartUpload({
+export async function completeMultipartUploadService({
   bucketId,
   objectName,
   uploadId,
