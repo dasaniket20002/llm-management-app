@@ -24,8 +24,8 @@ import {
   isPasskeySet,
   isPasswordSet,
   isUsernameSet,
-  setPassword,
-  setUsername,
+  updatePassword,
+  updateUsername,
 } from '#/lib/server/functions/user.functions'
 import { env } from '#/lib/utils/env'
 import { useForm } from '@tanstack/react-form'
@@ -175,7 +175,9 @@ function UsernameForm() {
     },
     onSubmit: async ({ value }) => {
       setSubmitting(true)
-      const res = await setUsername({ data: { newUsername: value.username } })
+      const res = await updateUsername({
+        data: { newUsername: value.username },
+      })
       if (res.success) toast.success(res.message)
       else toast.error(res.error)
       setSubmitting(false)
@@ -279,7 +281,9 @@ function PassowrdForm() {
     },
     onSubmit: async ({ value }) => {
       setSubmitting(true)
-      const res = await setPassword({ data: { newPassword: value.password } })
+      const res = await updatePassword({
+        data: { newPassword: value.password },
+      })
       if (res.success) toast.success(res.message)
       else toast.error(res.error)
       setSubmitting(false)
