@@ -34,6 +34,7 @@ import {
   TOAST_POSITIONS,
   useAppContext,
 } from '#/lib/client/contexts/app/app-context'
+import { toast } from 'sonner'
 
 const HeaderSettingsMenu = () => {
   const { theme, setTheme, toastPosition, setToastPosition } = useAppContext()
@@ -62,7 +63,10 @@ const HeaderSettingsMenu = () => {
                   <DropdownMenuLabel>Select Theme</DropdownMenuLabel>
                   <DropdownMenuRadioGroup
                     value={theme}
-                    onValueChange={setTheme}
+                    onValueChange={(t) => {
+                      toast.success(`Theme set to ${t}`)
+                      setTheme(t)
+                    }}
                   >
                     {THEMES.map((t, i) => (
                       <DropdownMenuRadioItem
@@ -94,7 +98,10 @@ const HeaderSettingsMenu = () => {
                   <DropdownMenuLabel>Select Position</DropdownMenuLabel>
                   <DropdownMenuRadioGroup
                     value={toastPosition}
-                    onValueChange={setToastPosition}
+                    onValueChange={(t) => {
+                      setToastPosition(t)
+                      toast.success(`Toast Position set to ${t}`)
+                    }}
                   >
                     {TOAST_POSITIONS.map((t, i) => (
                       <DropdownMenuRadioItem

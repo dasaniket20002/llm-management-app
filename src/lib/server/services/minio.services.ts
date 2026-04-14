@@ -78,6 +78,25 @@ export async function getPresignedPutUrlService({
   return { url, objectName, exipryTime }
 }
 
+export async function putObjectInBucket({
+  originalName,
+  extension,
+  bucketId,
+  imageBuffer,
+}: {
+  originalName: string
+  extension: string
+  bucketId: string
+  imageBuffer: Buffer<ArrayBuffer>
+}) {
+  const objectName = `${originalName}-${crypto.randomUUID()}.${extension}`
+  await minio.putObject(bucketId, objectName, imageBuffer, imageBuffer.length, {
+    'Content-Type': getMimeType(extension),
+  })
+
+  return { objectName }
+}
+
 export async function initiateMultipartUploadService({
   bucketId,
   originalName,

@@ -195,7 +195,7 @@ model User {
   updatedAt        DateTime                 @updatedAt @map("updated_at")
   username         String?                  @unique @map("username")
   displayUsername  String?                  @map("display_username")
-  storageBucketId  String?                  @unique @map("storage_bucket_id") @db.Uuid
+  storageBucketId  String?                  @unique @map("storage_bucket_id")
   sessions         Session[]
   accounts         Account[]
   passkeys         Passkey[]

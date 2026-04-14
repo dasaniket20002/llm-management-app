@@ -3,7 +3,7 @@ import {
   authMiddlewareWithOrganization,
   ensureSession,
 } from '#/lib/server/functions/auth.functions'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_protected')({
   server: {
@@ -11,6 +11,8 @@ export const Route = createFileRoute('/_protected')({
   },
   beforeLoad: async () => {
     const data = await ensureSession()
+    const organizationId = data.data.session.organizationId
+    if (!organizationId) throw redirect({ to: '/preprocess/session-org-init' })
     return { session: data.data }
   },
   pendingComponent: () => (

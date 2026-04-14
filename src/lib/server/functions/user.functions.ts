@@ -44,8 +44,14 @@ export const isPasskeySet = createServerFn({ method: 'GET' })
 export const isUsernameSet = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
-    const us = !!context.session.user.username
-    return serverFnSuccessResponse(us ? 'Username Set' : 'Username Unset', us)
+    const user = await context.prisma.user.findUnique({
+      where: { id: context.session.user.id },
+      select: { username: true },
+    })
+    return serverFnSuccessResponse(
+      user?.username ? 'Username Set' : 'Username Unset',
+      user?.username,
+    )
   })
 
 export const updatePassword = createServerFn({ method: 'POST' })

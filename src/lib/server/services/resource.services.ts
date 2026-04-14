@@ -5,7 +5,7 @@ import type { ResourceType, Visibility } from '../db/generated/enums'
 export async function createResourceService({
   resourceType,
   createdById,
-  visibility,
+  visibility = 'public',
   prisma,
 }: {
   resourceType: ResourceType

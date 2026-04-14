@@ -5,9 +5,20 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { env } from './utils/env'
-import { createUserResource } from './server/services/resource.services'
-import { createBucket } from './server/services/minio.services'
-import { checkPermission } from './server/services/permission.services'
+import { createResourceService } from './server/services/resource.services'
+import { grantRoleService } from './server/services/permission.services'
+import {
+  createBucketService,
+  putObjectInBucket,
+} from './server/services/minio.services'
+import {
+  updateUserAvatarService,
+  updateUserBucketService,
+} from './server/services/user.services'
+import {
+  createFileResourceService,
+  downloadFileService,
+} from './server/services/file.services'
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -61,12 +72,13 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          const resource = await createUserResource({
-            subjectRole: 'user_owner',
+          const userResource = await createResourceService({
+            resourceType: 'user',
+            prisma: prisma,
           })
           return {
             data: {
-              id: resource.id,
+              id: userResource.id,
               email: user.email,
               emailVerified: user.emailVerified,
               name: user.name,
@@ -75,15 +87,58 @@ export const auth = betterAuth({
           }
         },
         after: async (user) => {
-          const hasPermission = await checkPermission({
-            subjectResourceId: user.id,
-            targetResourceId: user.id,
-            permission: 'user:bucket:create',
-          })
+          // grant role here after the user is created for the granted by user id to be available
+          await prisma.$transaction(async (tx) => {
+            await grantRoleService({
+              subjectResourceId: user.id,
+              targetResourceId: user.id,
+              currentUserId: user.id,
+              role: 'user_owner',
+              prisma: tx,
+            })
 
-          if (hasPermission) {
-            const bucketId = await createBucket(user.id)
-          }
+            const createdBucketId = await createBucketService({
+              bucketPrefix: user.name.replaceAll(' ', '-').toLowerCase(),
+            })
+
+            await updateUserBucketService({
+              storageBucketId: createdBucketId,
+              userId: user.id,
+              prisma: tx,
+            })
+
+            // todo: extract image uploading to client so that i can check if there is
+            // user uploaded image or
+            // oauth user provided
+            // and execute accordingly
+            if (user.image) {
+              // save the image blob to bucket
+              const { imageBuffer, extension } = await downloadFileService({
+                link: user.image,
+              })
+              const { objectName } = await putObjectInBucket({
+                bucketId: createdBucketId,
+                imageBuffer,
+                extension,
+                originalName: 'profile-image/image',
+              })
+              const file = await createFileResourceService({
+                currentUserId: user.id,
+                originalName: objectName,
+                extension,
+                sizeBytes: imageBuffer.length,
+                storageBucketId: createdBucketId,
+                storageKey: objectName,
+                displayName: objectName,
+                prisma: tx,
+              })
+              await updateUserAvatarService({
+                userId: user.id,
+                imageFileId: file.id,
+                prisma: tx,
+              })
+            }
+          })
         },
       },
     },

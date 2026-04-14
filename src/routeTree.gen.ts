@@ -17,6 +17,7 @@ import { Route as PreprocessAccountSetupRouteImport } from './routes/preprocess/
 import { Route as UnprotectedSignUpRouteImport } from './routes/_unprotected/sign-up'
 import { Route as UnprotectedSignInRouteImport } from './routes/_unprotected/sign-in'
 import { Route as ProtectedMainRouteImport } from './routes/_protected/main'
+import { Route as ApiDeleteBucketUnprotectedIdRouteImport } from './routes/api/delete-bucket-unprotected.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ProtectedApiElectricSelfOwnedResourcesRouteImport } from './routes/_protected/api/electric/self-owned-resources'
 import { Route as ProtectedApiElectricResourceRoleAssignmentRouteImport } from './routes/_protected/api/electric/resource-role-assignment'
@@ -60,6 +61,12 @@ const ProtectedMainRoute = ProtectedMainRouteImport.update({
   path: '/main',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ApiDeleteBucketUnprotectedIdRoute =
+  ApiDeleteBucketUnprotectedIdRouteImport.update({
+    id: '/api/delete-bucket-unprotected/$id',
+    path: '/api/delete-bucket-unprotected/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
   '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/delete-bucket-unprotected/$id': typeof ApiDeleteBucketUnprotectedIdRoute
   '/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
   '/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
@@ -97,6 +105,7 @@ export interface FileRoutesByTo {
   '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
   '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/delete-bucket-unprotected/$id': typeof ApiDeleteBucketUnprotectedIdRoute
   '/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
   '/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
@@ -111,6 +120,7 @@ export interface FileRoutesById {
   '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
   '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/delete-bucket-unprotected/$id': typeof ApiDeleteBucketUnprotectedIdRoute
   '/_protected/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
   '/_protected/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
 }
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
     | '/api/auth/$'
+    | '/api/delete-bucket-unprotected/$id'
     | '/api/electric/resource-role-assignment'
     | '/api/electric/self-owned-resources'
   fileRoutesByTo: FileRoutesByTo
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
     | '/api/auth/$'
+    | '/api/delete-bucket-unprotected/$id'
     | '/api/electric/resource-role-assignment'
     | '/api/electric/self-owned-resources'
   id:
@@ -148,6 +160,7 @@ export interface FileRouteTypes {
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
     | '/api/auth/$'
+    | '/api/delete-bucket-unprotected/$id'
     | '/_protected/api/electric/resource-role-assignment'
     | '/_protected/api/electric/self-owned-resources'
   fileRoutesById: FileRoutesById
@@ -159,6 +172,7 @@ export interface RootRouteChildren {
   PreprocessAccountSetupRoute: typeof PreprocessAccountSetupRoute
   PreprocessSessionOrgInitRoute: typeof PreprocessSessionOrgInitRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiDeleteBucketUnprotectedIdRoute: typeof ApiDeleteBucketUnprotectedIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -218,6 +232,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/main'
       preLoaderRoute: typeof ProtectedMainRouteImport
       parentRoute: typeof ProtectedRoute
+    }
+    '/api/delete-bucket-unprotected/$id': {
+      id: '/api/delete-bucket-unprotected/$id'
+      path: '/api/delete-bucket-unprotected/$id'
+      fullPath: '/api/delete-bucket-unprotected/$id'
+      preLoaderRoute: typeof ApiDeleteBucketUnprotectedIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -282,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreprocessAccountSetupRoute: PreprocessAccountSetupRoute,
   PreprocessSessionOrgInitRoute: PreprocessSessionOrgInitRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiDeleteBucketUnprotectedIdRoute: ApiDeleteBucketUnprotectedIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

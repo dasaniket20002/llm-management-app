@@ -84,7 +84,9 @@ export const MIME_TYPES = {
   '7z': 'application/x-7z-compressed',
 } as const satisfies Record<string, string>
 
-export function getMimeType(ext: string): string {
+export function getMimeType(
+  ext: keyof typeof MIME_TYPES | (string & {}),
+): string {
   return (
     (MIME_TYPES as Record<string, string>)[ext] ?? 'application/octet-stream'
   )
@@ -114,20 +116,4 @@ export function json<T>(
     },
     status,
   })
-}
-
-export function serializeError(err: unknown) {
-  if (err instanceof Error) {
-    return {
-      name: err.name,
-      message: err.message,
-      stack: err.stack,
-      cause: err.cause as {} | undefined,
-    }
-  }
-
-  return {
-    name: 'UnknownError',
-    message: String(err),
-  }
 }
