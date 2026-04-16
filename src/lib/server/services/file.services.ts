@@ -1,6 +1,5 @@
-import { getMimeType } from '#/lib/utils/utils'
 import type { PrismaTransaction } from '../db/db'
-import type { PrismaClient } from '../db/generated/client'
+import type { PrismaClient, Visibility } from '../db/generated/client'
 
 export async function createFileResourceService({
   originalName,
@@ -10,6 +9,7 @@ export async function createFileResourceService({
   storageBucketId,
   storageKey,
   currentUserId,
+  visibility = 'private',
   prisma,
 }: {
   originalName: string
@@ -19,12 +19,14 @@ export async function createFileResourceService({
   storageKey: string
   storageBucketId: string
   currentUserId: string
+  visibility?: Visibility
   prisma: PrismaClient | PrismaTransaction
 }) {
   return await prisma.resource.create({
     data: {
       resourceType: 'file',
       createdById: currentUserId,
+      visibility,
       file: {
         create: {
           originalName,
@@ -33,7 +35,6 @@ export async function createFileResourceService({
           sizeBytes,
           storageBucketId,
           storageKey,
-          mimeType: getMimeType(extension),
         },
       },
     },

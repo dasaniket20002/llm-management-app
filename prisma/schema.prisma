@@ -45,7 +45,7 @@ model Permission {
   updatedAt       DateTime         @updatedAt @map("updated_at")
   rolePermissions RolePermission[]
 
-  @@map("permissions")
+  @@map("permission")
 }
 
 model Role {
@@ -102,7 +102,7 @@ model ResourceRoleAssignment {
   @@index([subjectResourceId, isActive])
   @@index([targetResourceId, isActive])
   @@index([expiresAt])
-  @@map("resource_role_assignments")
+  @@map("resource_role_assignment")
 }
 
 model Resource {
@@ -131,11 +131,10 @@ model File {
   id              String        @id @db.Uuid
   originalName    String        @map("original_name")
   displayName     String?       @map("display_name")
-  mimeType        String        @map("mime_type")
   extension       String        @map("extension")
   sizeBytes       BigInt        @map("size_bytes")
   storageKey      String        @unique @map("storage_key")
-  storageBucketId String        @map("storage_bucket_id") @db.Uuid
+  storageBucketId String        @map("storage_bucket_id")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
   resource        Resource      @relation("FileResource", fields: [id], references: [id], onDelete: Cascade)
@@ -144,9 +143,7 @@ model File {
 
   @@index([storageBucketId])
   @@index([storageKey])
-  @@index([mimeType])
-  @@index([storageBucketId, createdAt])
-  @@map("files")
+  @@map("file")
 }
 
 model Organization {
@@ -160,7 +157,7 @@ model Organization {
   resource        Resource           @relation("OrganizationResource", fields: [id], references: [id], onDelete: Cascade)
   members         UserOrganization[]
   sessions        Session[]          @relation("SessionOrganization")
-  storageBucketId String             @unique @map("storage_bucket_id") @db.Uuid
+  storageBucketId String             @unique @map("storage_bucket_id")
 
   @@map("organization")
 }

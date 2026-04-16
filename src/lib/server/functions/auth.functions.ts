@@ -38,13 +38,19 @@ export const updateSessionOrganization = createServerFn({ method: 'POST' })
     return serverFnSuccessResponse('Found', session)
   })
 
-export const authMiddleware = createMiddleware().server(async ({ next }) => {
-  const sessionData = await getSession()
-  const session = sessionData.data
-  if (!session) throw redirect({ to: '/sign-in' })
+export const dbMiddleware = createMiddleware().server(({ next }) =>
+  next({ context: { prisma } }),
+)
 
-  return next({ context: { session, prisma } })
-})
+export const authMiddleware = createMiddleware()
+  .middleware([dbMiddleware])
+  .server(async ({ next, context }) => {
+    const sessionData = await getSession()
+    const session = sessionData.data
+    if (!session) throw redirect({ to: '/sign-in' })
+
+    return next({ context: { session, prisma: context.prisma } })
+  })
 
 export const authMiddlewareWithOrganization = createMiddleware()
   .middleware([authMiddleware])

@@ -21,19 +21,58 @@ import { Input } from '#/components/ui/input'
 import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import { Switch } from '#/components/ui/switch'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '#/components/ui/tooltip'
+import { authClient } from '#/lib/auth-client'
 import { useIsMobile } from '#/lib/client/hooks/use-mobile'
-import { ensureSession } from '#/lib/server/functions/auth.functions'
-import { organizationIdentifierAvailable } from '#/lib/server/functions/organization.functions'
+import { updateSessionOrganization } from '#/lib/server/functions/auth.functions'
+import {
+  getSelfOrganizations,
+  organizationIdentifierAvailable,
+} from '#/lib/server/functions/organization.functions'
+import { checkPermissions } from '#/lib/server/functions/permission.functions'
 import { useForm } from '@tanstack/react-form'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { LogOut } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
-export const Route = createFileRoute('/preprocess/session-org-init')({
-  beforeLoad: async () => {
-    const data = await ensureSession()
-    if (data.data.session.organizationId) throw redirect({ to: '/main' })
-    return { session: data.data }
+export const Route = createFileRoute(
+  '/_authenticated/preprocess/session-org-init',
+)({
+  beforeLoad: async ({ context }) => {
+    if (context.session.session.organizationId)
+      throw redirect({ to: '/dashboard' })
+
+    const [canCreateOrganization, canJoinOrganization] = await checkPermissions(
+      {
+        data: {
+          subjectResourceId: context.session.user.id,
+          targetResourceId: context.session.user.id,
+          permissions: ['create:organization', 'join:organization'],
+        },
+      },
+    )
+
+    // if managed user can join only one organization
+    if (!canJoinOrganization) {
+      const selfOrganizations = await getSelfOrganizations()
+      if (selfOrganizations.length === 1) {
+        await updateSessionOrganization({
+          data: { organizationId: selfOrganizations[0].organization.id },
+        })
+        throw redirect({ to: '/dashboard' })
+      }
+    }
+
+    return {
+      session: context.session,
+      canCreateOrganization,
+      canJoinOrganization,
+    }
   },
   component: RouteComponent,
 })
@@ -46,14 +85,46 @@ const createFormSchema = z.object({
 
 function RouteComponent() {
   const isMobile = useIsMobile()
+  const navigate = useNavigate()
+  const { canCreateOrganization, canJoinOrganization } = Route.useRouteContext()
 
   return (
     <div className="min-h-svh place-items-center place-content-center bg-muted p-6 md:p-10">
       <div className="flex flex-col gap-6 items-center max-w-5xl w-full">
-        <Logo includeName textVariant="primary" iconVariant="card" />
+        <div className="w-full grid grid-cols-3 px-6">
+          <Logo
+            includeName
+            textVariant="primary"
+            iconVariant="card"
+            className="col-[2/3] justify-center"
+          />
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  size="icon-xs"
+                  variant="outline"
+                  className="place-self-end"
+                  onClick={() => {
+                    authClient.signOut({
+                      fetchOptions: {
+                        onSuccess: () => navigate({ to: '/sign-in' }),
+                      },
+                    })
+                  }}
+                >
+                  <LogOut />
+                </Button>
+              }
+            />
+            <TooltipContent>Sign Out</TooltipContent>
+          </Tooltip>
+        </div>
         <Card className="w-full flex-col-reverse md:flex-row py-0">
-          <CreateForm />
-          <Separator orientation={isMobile ? 'horizontal' : 'vertical'} />
+          {canCreateOrganization && <CreateForm />}
+          {canCreateOrganization && canJoinOrganization && (
+            <Separator orientation={isMobile ? 'horizontal' : 'vertical'} />
+          )}
 
           <div className="flex flex-col gap-6 w-full py-6">
             <CardHeader className="text-center">

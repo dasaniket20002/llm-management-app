@@ -20,15 +20,19 @@ export function prepareElectricUrl(
       electricRequestURL.searchParams.set(key, value)
     }
   })
-  electricRequestURL.searchParams.set(`table`, table)
+  electricRequestURL.searchParams.set(`table`, table.trim())
   if (!electricRequestURL.searchParams.get('offset'))
     electricRequestURL.searchParams.set(`offset`, '-1')
   electricRequestURL.searchParams.set(`secret`, env.ELECTRIC_SECRET)
 
   if (where) {
-    electricRequestURL.searchParams.set(`where`, where.where)
+    console.log(where.where.trim().replace(/\s+/g, ' '))
+    electricRequestURL.searchParams.set(
+      `where`,
+      where.where.trim().replace(/\s+/g, ' '),
+    )
     where.params?.forEach((value, index) => {
-      electricRequestURL.searchParams.set(`params[${index + 1}]`, value)
+      electricRequestURL.searchParams.set(`params[${index + 1}]`, value.trim())
     })
   }
 

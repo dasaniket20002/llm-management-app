@@ -38,7 +38,6 @@ export type FileMinAggregateOutputType = {
   id: string | null
   originalName: string | null
   displayName: string | null
-  mimeType: string | null
   extension: string | null
   sizeBytes: bigint | null
   storageKey: string | null
@@ -51,7 +50,6 @@ export type FileMaxAggregateOutputType = {
   id: string | null
   originalName: string | null
   displayName: string | null
-  mimeType: string | null
   extension: string | null
   sizeBytes: bigint | null
   storageKey: string | null
@@ -64,7 +62,6 @@ export type FileCountAggregateOutputType = {
   id: number
   originalName: number
   displayName: number
-  mimeType: number
   extension: number
   sizeBytes: number
   storageKey: number
@@ -87,7 +84,6 @@ export type FileMinAggregateInputType = {
   id?: true
   originalName?: true
   displayName?: true
-  mimeType?: true
   extension?: true
   sizeBytes?: true
   storageKey?: true
@@ -100,7 +96,6 @@ export type FileMaxAggregateInputType = {
   id?: true
   originalName?: true
   displayName?: true
-  mimeType?: true
   extension?: true
   sizeBytes?: true
   storageKey?: true
@@ -113,7 +108,6 @@ export type FileCountAggregateInputType = {
   id?: true
   originalName?: true
   displayName?: true
-  mimeType?: true
   extension?: true
   sizeBytes?: true
   storageKey?: true
@@ -213,7 +207,6 @@ export type FileGroupByOutputType = {
   id: string
   originalName: string
   displayName: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint
   storageKey: string
@@ -249,11 +242,10 @@ export type FileWhereInput = {
   id?: Prisma.UuidFilter<"File"> | string
   originalName?: Prisma.StringFilter<"File"> | string
   displayName?: Prisma.StringNullableFilter<"File"> | string | null
-  mimeType?: Prisma.StringFilter<"File"> | string
   extension?: Prisma.StringFilter<"File"> | string
   sizeBytes?: Prisma.BigIntFilter<"File"> | bigint | number
   storageKey?: Prisma.StringFilter<"File"> | string
-  storageBucketId?: Prisma.UuidFilter<"File"> | string
+  storageBucketId?: Prisma.StringFilter<"File"> | string
   createdAt?: Prisma.DateTimeFilter<"File"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"File"> | Date | string
   resource?: Prisma.XOR<Prisma.ResourceScalarRelationFilter, Prisma.ResourceWhereInput>
@@ -265,7 +257,6 @@ export type FileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   originalName?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
   extension?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
@@ -285,10 +276,9 @@ export type FileWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.FileWhereInput | Prisma.FileWhereInput[]
   originalName?: Prisma.StringFilter<"File"> | string
   displayName?: Prisma.StringNullableFilter<"File"> | string | null
-  mimeType?: Prisma.StringFilter<"File"> | string
   extension?: Prisma.StringFilter<"File"> | string
   sizeBytes?: Prisma.BigIntFilter<"File"> | bigint | number
-  storageBucketId?: Prisma.UuidFilter<"File"> | string
+  storageBucketId?: Prisma.StringFilter<"File"> | string
   createdAt?: Prisma.DateTimeFilter<"File"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"File"> | Date | string
   resource?: Prisma.XOR<Prisma.ResourceScalarRelationFilter, Prisma.ResourceWhereInput>
@@ -300,7 +290,6 @@ export type FileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   originalName?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
   extension?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
@@ -321,11 +310,10 @@ export type FileScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"File"> | string
   originalName?: Prisma.StringWithAggregatesFilter<"File"> | string
   displayName?: Prisma.StringNullableWithAggregatesFilter<"File"> | string | null
-  mimeType?: Prisma.StringWithAggregatesFilter<"File"> | string
   extension?: Prisma.StringWithAggregatesFilter<"File"> | string
   sizeBytes?: Prisma.BigIntWithAggregatesFilter<"File"> | bigint | number
   storageKey?: Prisma.StringWithAggregatesFilter<"File"> | string
-  storageBucketId?: Prisma.UuidWithAggregatesFilter<"File"> | string
+  storageBucketId?: Prisma.StringWithAggregatesFilter<"File"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"File"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"File"> | Date | string
 }
@@ -333,7 +321,6 @@ export type FileScalarWhereWithAggregatesInput = {
 export type FileCreateInput = {
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -349,7 +336,6 @@ export type FileUncheckedCreateInput = {
   id: string
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -363,7 +349,6 @@ export type FileUncheckedCreateInput = {
 export type FileUpdateInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -379,7 +364,6 @@ export type FileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -394,7 +378,6 @@ export type FileCreateManyInput = {
   id: string
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -406,7 +389,6 @@ export type FileCreateManyInput = {
 export type FileUpdateManyMutationInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -419,7 +401,6 @@ export type FileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -437,7 +418,6 @@ export type FileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   originalName?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
   extension?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
@@ -454,7 +434,6 @@ export type FileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   originalName?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
   extension?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
@@ -467,7 +446,6 @@ export type FileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   originalName?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
   extension?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
@@ -555,7 +533,6 @@ export type FileUpdateOneWithoutUserImageNestedInput = {
 export type FileCreateWithoutResourceInput = {
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -569,7 +546,6 @@ export type FileCreateWithoutResourceInput = {
 export type FileUncheckedCreateWithoutResourceInput = {
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -599,7 +575,6 @@ export type FileUpdateToOneWithWhereWithoutResourceInput = {
 export type FileUpdateWithoutResourceInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -613,7 +588,6 @@ export type FileUpdateWithoutResourceInput = {
 export type FileUncheckedUpdateWithoutResourceInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -627,7 +601,6 @@ export type FileUncheckedUpdateWithoutResourceInput = {
 export type FileCreateWithoutOrgImageInput = {
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -642,7 +615,6 @@ export type FileUncheckedCreateWithoutOrgImageInput = {
   id: string
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -671,7 +643,6 @@ export type FileUpdateToOneWithWhereWithoutOrgImageInput = {
 export type FileUpdateWithoutOrgImageInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -686,7 +657,6 @@ export type FileUncheckedUpdateWithoutOrgImageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -699,7 +669,6 @@ export type FileUncheckedUpdateWithoutOrgImageInput = {
 export type FileCreateWithoutUserImageInput = {
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -714,7 +683,6 @@ export type FileUncheckedCreateWithoutUserImageInput = {
   id: string
   originalName: string
   displayName?: string | null
-  mimeType: string
   extension: string
   sizeBytes: bigint | number
   storageKey: string
@@ -743,7 +711,6 @@ export type FileUpdateToOneWithWhereWithoutUserImageInput = {
 export type FileUpdateWithoutUserImageInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -758,7 +725,6 @@ export type FileUncheckedUpdateWithoutUserImageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   extension?: Prisma.StringFieldUpdateOperationsInput | string
   sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -774,7 +740,6 @@ export type FileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   originalName?: boolean
   displayName?: boolean
-  mimeType?: boolean
   extension?: boolean
   sizeBytes?: boolean
   storageKey?: boolean
@@ -790,7 +755,6 @@ export type FileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   originalName?: boolean
   displayName?: boolean
-  mimeType?: boolean
   extension?: boolean
   sizeBytes?: boolean
   storageKey?: boolean
@@ -804,7 +768,6 @@ export type FileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   originalName?: boolean
   displayName?: boolean
-  mimeType?: boolean
   extension?: boolean
   sizeBytes?: boolean
   storageKey?: boolean
@@ -818,7 +781,6 @@ export type FileSelectScalar = {
   id?: boolean
   originalName?: boolean
   displayName?: boolean
-  mimeType?: boolean
   extension?: boolean
   sizeBytes?: boolean
   storageKey?: boolean
@@ -827,7 +789,7 @@ export type FileSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "originalName" | "displayName" | "mimeType" | "extension" | "sizeBytes" | "storageKey" | "storageBucketId" | "createdAt" | "updatedAt", ExtArgs["result"]["file"]>
+export type FileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "originalName" | "displayName" | "extension" | "sizeBytes" | "storageKey" | "storageBucketId" | "createdAt" | "updatedAt", ExtArgs["result"]["file"]>
 export type FileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resource?: boolean | Prisma.ResourceDefaultArgs<ExtArgs>
   userImage?: boolean | Prisma.File$userImageArgs<ExtArgs>
@@ -851,7 +813,6 @@ export type $FilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     id: string
     originalName: string
     displayName: string | null
-    mimeType: string
     extension: string
     sizeBytes: bigint
     storageKey: string
@@ -1287,7 +1248,6 @@ export interface FileFieldRefs {
   readonly id: Prisma.FieldRef<"File", 'String'>
   readonly originalName: Prisma.FieldRef<"File", 'String'>
   readonly displayName: Prisma.FieldRef<"File", 'String'>
-  readonly mimeType: Prisma.FieldRef<"File", 'String'>
   readonly extension: Prisma.FieldRef<"File", 'String'>
   readonly sizeBytes: Prisma.FieldRef<"File", 'BigInt'>
   readonly storageKey: Prisma.FieldRef<"File", 'String'>

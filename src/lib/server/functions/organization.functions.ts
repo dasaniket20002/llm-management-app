@@ -1,55 +1,104 @@
-import { createServerFn } from '@tanstack/react-start'
-import z from 'zod'
-import {
-  authMiddleware,
-  authMiddlewareWithOrganization,
-} from './auth.functions'
 import {
   serverFnErrorResponse,
   serverFnSuccessResponse,
 } from '#/lib/types/server-fn'
-import { prisma } from '../db/db'
+import { createServerFn } from '@tanstack/react-start'
+import z from 'zod'
+import { generateTxId } from '../db/db'
+import type { Visibility } from '../db/generated/enums'
+import type { Role } from '../db/roles_permissions'
+import { createFileResourceService } from '../services/file.services'
+import { createBucketService } from '../services/minio.services'
+import {
+  addMemberToOrganization,
+  createOrganizationResourceService,
+  getPublicOrganizationsService,
+  getUserOrganizationsService,
+  updateOrganizationMemberUsername,
+} from '../services/organization.services'
 import {
   checkPermissionService,
   grantRoleService,
 } from '../services/permission.services'
-import { updateOrganizationMemberUsername } from '../services/organization.services'
-import { createFileResourceService } from '../services/file.services'
 import { updateUserAvatarService } from '../services/user.services'
-import type { Role } from '../db/roles_permissions'
+import {
+  authMiddleware,
+  authMiddlewareWithOrganization,
+  dbMiddleware,
+} from './auth.functions'
 
-export const createOrganization = createServerFn({ method: 'POST' })
+export const createOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data) => data)
-  .handler(async () => {
-    return 0
-  })
+  .inputValidator(
+    (data: {
+      name: string
+      identifier: string
+      imageFileId?: string
+      imageFileExtension?: string
+      visibility: Visibility
+    }) => data,
+  )
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const txid = await generateTxId(tx)
 
-export const updateOrganization = createServerFn({ method: 'POST' })
-  .middleware([authMiddleware])
-  .inputValidator((data) => data)
-  .handler(async () => {
-    return 0
-  })
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: context.session.user.id,
+        permission: 'create:organization',
+        prisma: tx,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          permissionsRequired: 'create:organization',
+          txid,
+        })
 
-export const deleteOrganization = createServerFn({ method: 'POST' })
-  .middleware([authMiddleware])
-  .inputValidator((data) => data)
-  .handler(async () => {
-    return 0
-  })
+      const bucketId = await createBucketService({
+        bucketPrefix: data.identifier,
+      })
+
+      const organization = await createOrganizationResourceService({
+        currentUserId: context.session.user.id,
+        name: data.name,
+        identifier: data.identifier,
+        storageBucketId: bucketId,
+        visibility: data.visibility,
+        imageFileId: data.imageFileId,
+        prisma: tx,
+      })
+
+      const addMemberPromise = addMemberToOrganization({
+        organizationId: organization.id,
+        userId: context.session.user.id,
+        status: 'active',
+        prisma: tx,
+      })
+      const grantRolePromise = grantRoleService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: organization.id,
+        currentUserId: context.session.user.id,
+        role: 'org_owner',
+        prisma: tx,
+      })
+      await Promise.all([addMemberPromise, grantRolePromise])
+
+      return serverFnSuccessResponse('Created', { organization, txid })
+    }),
+  )
 
 export const organizationIdentifierAvailable = createServerFn({
   method: 'POST',
 })
+  .middleware([dbMiddleware])
   .inputValidator((data) =>
     z.object({ identifier: z.string() }).safeParse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     if (!data.success) return serverFnErrorResponse('Validation Error', null)
     const inputData = data.data
 
-    const org = await prisma.organization.findUnique({
+    const org = await context.prisma.organization.findUnique({
       where: { identifier: inputData.identifier },
     })
 
@@ -134,6 +183,7 @@ export const updateMemberAvatar = createServerFn({ method: 'POST' })
         sizeBytes: data.sizeBytes,
         storageKey: data.storageKey,
         storageBucketId: bucket.storageBucketId,
+        visibility: 'private',
         prisma: tx,
       })
       await grantRoleService({
@@ -141,6 +191,13 @@ export const updateMemberAvatar = createServerFn({ method: 'POST' })
         subjectResourceId: context.session.session.organizationId,
         targetResourceId: file.id,
         role: 'file_owner',
+        prisma: tx,
+      })
+      await grantRoleService({
+        currentUserId: context.session.user.id,
+        subjectResourceId: data.userId,
+        targetResourceId: file.id,
+        role: 'file_editor',
         prisma: tx,
       })
       const _updated = await updateUserAvatarService({
@@ -186,3 +243,20 @@ export const grantRoleToMember = createServerFn({ method: 'POST' })
 
     return serverFnSuccessResponse('Success', role)
   })
+
+export const getPublicOrganizations = createServerFn({ method: 'GET' })
+  .middleware([dbMiddleware])
+  .handler(async ({ context }) =>
+    getPublicOrganizationsService({
+      prisma: context.prisma,
+    }),
+  )
+
+export const getSelfOrganizations = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) =>
+    getUserOrganizationsService({
+      userId: context.session.user.id,
+      prisma: context.prisma,
+    }),
+  )

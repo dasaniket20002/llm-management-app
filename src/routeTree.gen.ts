@@ -10,40 +10,37 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnprotectedRouteImport } from './routes/_unprotected'
-import { Route as ProtectedRouteImport } from './routes/_protected'
+import { Route as OrganizationalRouteImport } from './routes/_organizational'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PreprocessSessionOrgInitRouteImport } from './routes/preprocess/session-org-init'
-import { Route as PreprocessAccountSetupRouteImport } from './routes/preprocess/account-setup'
 import { Route as UnprotectedSignUpRouteImport } from './routes/_unprotected/sign-up'
 import { Route as UnprotectedSignInRouteImport } from './routes/_unprotected/sign-in'
-import { Route as ProtectedMainRouteImport } from './routes/_protected/main'
-import { Route as ApiDeleteBucketUnprotectedIdRouteImport } from './routes/api/delete-bucket-unprotected.$id'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
-import { Route as ProtectedApiElectricSelfOwnedResourcesRouteImport } from './routes/_protected/api/electric/self-owned-resources'
-import { Route as ProtectedApiElectricResourceRoleAssignmentRouteImport } from './routes/_protected/api/electric/resource-role-assignment'
+import { Route as OrganizationalDashboardRouteImport } from './routes/_organizational/dashboard'
+import { Route as AuthenticatedMainRouteImport } from './routes/_authenticated/main'
+import { Route as AuthenticatedPreprocessSessionOrgInitRouteImport } from './routes/_authenticated/preprocess/session-org-init'
+import { Route as AuthenticatedPreprocessAccountSetupRouteImport } from './routes/_authenticated/preprocess/account-setup'
+import { Route as UnprotectedApiElectricPublicOrganizationsRouteImport } from './routes/_unprotected/api/electric/public-organizations'
+import { Route as UnprotectedApiDeleteBucketUnprotectedIdRouteImport } from './routes/_unprotected/api/delete-bucket-unprotected.$id'
+import { Route as UnprotectedApiAuthSplatRouteImport } from './routes/_unprotected/api/auth.$'
+import { Route as OrganizationalApiElectricSelfResourceRolesRouteImport } from './routes/_organizational/api/electric/self-resource-roles'
+import { Route as OrganizationalApiElectricSelfOrganizationMembersRouteImport } from './routes/_organizational/api/electric/self-organization-members'
+import { Route as AuthenticatedApiElectricSelfOrganizationsRouteImport } from './routes/_authenticated/api/electric/self-organizations'
 
 const UnprotectedRoute = UnprotectedRouteImport.update({
   id: '/_unprotected',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProtectedRoute = ProtectedRouteImport.update({
-  id: '/_protected',
+const OrganizationalRoute = OrganizationalRouteImport.update({
+  id: '/_organizational',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PreprocessSessionOrgInitRoute =
-  PreprocessSessionOrgInitRouteImport.update({
-    id: '/preprocess/session-org-init',
-    path: '/preprocess/session-org-init',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PreprocessAccountSetupRoute = PreprocessAccountSetupRouteImport.update({
-  id: '/preprocess/account-setup',
-  path: '/preprocess/account-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UnprotectedSignUpRoute = UnprotectedSignUpRouteImport.update({
@@ -56,123 +53,169 @@ const UnprotectedSignInRoute = UnprotectedSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => UnprotectedRoute,
 } as any)
-const ProtectedMainRoute = ProtectedMainRouteImport.update({
+const OrganizationalDashboardRoute = OrganizationalDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => OrganizationalRoute,
+} as any)
+const AuthenticatedMainRoute = AuthenticatedMainRouteImport.update({
   id: '/main',
   path: '/main',
-  getParentRoute: () => ProtectedRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const ApiDeleteBucketUnprotectedIdRoute =
-  ApiDeleteBucketUnprotectedIdRouteImport.update({
+const AuthenticatedPreprocessSessionOrgInitRoute =
+  AuthenticatedPreprocessSessionOrgInitRouteImport.update({
+    id: '/preprocess/session-org-init',
+    path: '/preprocess/session-org-init',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPreprocessAccountSetupRoute =
+  AuthenticatedPreprocessAccountSetupRouteImport.update({
+    id: '/preprocess/account-setup',
+    path: '/preprocess/account-setup',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const UnprotectedApiElectricPublicOrganizationsRoute =
+  UnprotectedApiElectricPublicOrganizationsRouteImport.update({
+    id: '/api/electric/public-organizations',
+    path: '/api/electric/public-organizations',
+    getParentRoute: () => UnprotectedRoute,
+  } as any)
+const UnprotectedApiDeleteBucketUnprotectedIdRoute =
+  UnprotectedApiDeleteBucketUnprotectedIdRouteImport.update({
     id: '/api/delete-bucket-unprotected/$id',
     path: '/api/delete-bucket-unprotected/$id',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => UnprotectedRoute,
   } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+const UnprotectedApiAuthSplatRoute = UnprotectedApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => UnprotectedRoute,
 } as any)
-const ProtectedApiElectricSelfOwnedResourcesRoute =
-  ProtectedApiElectricSelfOwnedResourcesRouteImport.update({
-    id: '/api/electric/self-owned-resources',
-    path: '/api/electric/self-owned-resources',
-    getParentRoute: () => ProtectedRoute,
+const OrganizationalApiElectricSelfResourceRolesRoute =
+  OrganizationalApiElectricSelfResourceRolesRouteImport.update({
+    id: '/api/electric/self-resource-roles',
+    path: '/api/electric/self-resource-roles',
+    getParentRoute: () => OrganizationalRoute,
   } as any)
-const ProtectedApiElectricResourceRoleAssignmentRoute =
-  ProtectedApiElectricResourceRoleAssignmentRouteImport.update({
-    id: '/api/electric/resource-role-assignment',
-    path: '/api/electric/resource-role-assignment',
-    getParentRoute: () => ProtectedRoute,
+const OrganizationalApiElectricSelfOrganizationMembersRoute =
+  OrganizationalApiElectricSelfOrganizationMembersRouteImport.update({
+    id: '/api/electric/self-organization-members',
+    path: '/api/electric/self-organization-members',
+    getParentRoute: () => OrganizationalRoute,
+  } as any)
+const AuthenticatedApiElectricSelfOrganizationsRoute =
+  AuthenticatedApiElectricSelfOrganizationsRouteImport.update({
+    id: '/api/electric/self-organizations',
+    path: '/api/electric/self-organizations',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/main': typeof ProtectedMainRoute
+  '/main': typeof AuthenticatedMainRoute
+  '/dashboard': typeof OrganizationalDashboardRoute
   '/sign-in': typeof UnprotectedSignInRoute
   '/sign-up': typeof UnprotectedSignUpRoute
-  '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
-  '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/delete-bucket-unprotected/$id': typeof ApiDeleteBucketUnprotectedIdRoute
-  '/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
-  '/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
+  '/preprocess/account-setup': typeof AuthenticatedPreprocessAccountSetupRoute
+  '/preprocess/session-org-init': typeof AuthenticatedPreprocessSessionOrgInitRoute
+  '/api/electric/self-organizations': typeof AuthenticatedApiElectricSelfOrganizationsRoute
+  '/api/electric/self-organization-members': typeof OrganizationalApiElectricSelfOrganizationMembersRoute
+  '/api/electric/self-resource-roles': typeof OrganizationalApiElectricSelfResourceRolesRoute
+  '/api/auth/$': typeof UnprotectedApiAuthSplatRoute
+  '/api/delete-bucket-unprotected/$id': typeof UnprotectedApiDeleteBucketUnprotectedIdRoute
+  '/api/electric/public-organizations': typeof UnprotectedApiElectricPublicOrganizationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/main': typeof ProtectedMainRoute
+  '/main': typeof AuthenticatedMainRoute
+  '/dashboard': typeof OrganizationalDashboardRoute
   '/sign-in': typeof UnprotectedSignInRoute
   '/sign-up': typeof UnprotectedSignUpRoute
-  '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
-  '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/delete-bucket-unprotected/$id': typeof ApiDeleteBucketUnprotectedIdRoute
-  '/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
-  '/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
+  '/preprocess/account-setup': typeof AuthenticatedPreprocessAccountSetupRoute
+  '/preprocess/session-org-init': typeof AuthenticatedPreprocessSessionOrgInitRoute
+  '/api/electric/self-organizations': typeof AuthenticatedApiElectricSelfOrganizationsRoute
+  '/api/electric/self-organization-members': typeof OrganizationalApiElectricSelfOrganizationMembersRoute
+  '/api/electric/self-resource-roles': typeof OrganizationalApiElectricSelfResourceRolesRoute
+  '/api/auth/$': typeof UnprotectedApiAuthSplatRoute
+  '/api/delete-bucket-unprotected/$id': typeof UnprotectedApiDeleteBucketUnprotectedIdRoute
+  '/api/electric/public-organizations': typeof UnprotectedApiElectricPublicOrganizationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_protected': typeof ProtectedRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_organizational': typeof OrganizationalRouteWithChildren
   '/_unprotected': typeof UnprotectedRouteWithChildren
-  '/_protected/main': typeof ProtectedMainRoute
+  '/_authenticated/main': typeof AuthenticatedMainRoute
+  '/_organizational/dashboard': typeof OrganizationalDashboardRoute
   '/_unprotected/sign-in': typeof UnprotectedSignInRoute
   '/_unprotected/sign-up': typeof UnprotectedSignUpRoute
-  '/preprocess/account-setup': typeof PreprocessAccountSetupRoute
-  '/preprocess/session-org-init': typeof PreprocessSessionOrgInitRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/delete-bucket-unprotected/$id': typeof ApiDeleteBucketUnprotectedIdRoute
-  '/_protected/api/electric/resource-role-assignment': typeof ProtectedApiElectricResourceRoleAssignmentRoute
-  '/_protected/api/electric/self-owned-resources': typeof ProtectedApiElectricSelfOwnedResourcesRoute
+  '/_authenticated/preprocess/account-setup': typeof AuthenticatedPreprocessAccountSetupRoute
+  '/_authenticated/preprocess/session-org-init': typeof AuthenticatedPreprocessSessionOrgInitRoute
+  '/_authenticated/api/electric/self-organizations': typeof AuthenticatedApiElectricSelfOrganizationsRoute
+  '/_organizational/api/electric/self-organization-members': typeof OrganizationalApiElectricSelfOrganizationMembersRoute
+  '/_organizational/api/electric/self-resource-roles': typeof OrganizationalApiElectricSelfResourceRolesRoute
+  '/_unprotected/api/auth/$': typeof UnprotectedApiAuthSplatRoute
+  '/_unprotected/api/delete-bucket-unprotected/$id': typeof UnprotectedApiDeleteBucketUnprotectedIdRoute
+  '/_unprotected/api/electric/public-organizations': typeof UnprotectedApiElectricPublicOrganizationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/main'
+    | '/dashboard'
     | '/sign-in'
     | '/sign-up'
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
+    | '/api/electric/self-organizations'
+    | '/api/electric/self-organization-members'
+    | '/api/electric/self-resource-roles'
     | '/api/auth/$'
     | '/api/delete-bucket-unprotected/$id'
-    | '/api/electric/resource-role-assignment'
-    | '/api/electric/self-owned-resources'
+    | '/api/electric/public-organizations'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/main'
+    | '/dashboard'
     | '/sign-in'
     | '/sign-up'
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
+    | '/api/electric/self-organizations'
+    | '/api/electric/self-organization-members'
+    | '/api/electric/self-resource-roles'
     | '/api/auth/$'
     | '/api/delete-bucket-unprotected/$id'
-    | '/api/electric/resource-role-assignment'
-    | '/api/electric/self-owned-resources'
+    | '/api/electric/public-organizations'
   id:
     | '__root__'
     | '/'
-    | '/_protected'
+    | '/_authenticated'
+    | '/_organizational'
     | '/_unprotected'
-    | '/_protected/main'
+    | '/_authenticated/main'
+    | '/_organizational/dashboard'
     | '/_unprotected/sign-in'
     | '/_unprotected/sign-up'
-    | '/preprocess/account-setup'
-    | '/preprocess/session-org-init'
-    | '/api/auth/$'
-    | '/api/delete-bucket-unprotected/$id'
-    | '/_protected/api/electric/resource-role-assignment'
-    | '/_protected/api/electric/self-owned-resources'
+    | '/_authenticated/preprocess/account-setup'
+    | '/_authenticated/preprocess/session-org-init'
+    | '/_authenticated/api/electric/self-organizations'
+    | '/_organizational/api/electric/self-organization-members'
+    | '/_organizational/api/electric/self-resource-roles'
+    | '/_unprotected/api/auth/$'
+    | '/_unprotected/api/delete-bucket-unprotected/$id'
+    | '/_unprotected/api/electric/public-organizations'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ProtectedRoute: typeof ProtectedRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  OrganizationalRoute: typeof OrganizationalRouteWithChildren
   UnprotectedRoute: typeof UnprotectedRouteWithChildren
-  PreprocessAccountSetupRoute: typeof PreprocessAccountSetupRoute
-  PreprocessSessionOrgInitRoute: typeof PreprocessSessionOrgInitRoute
-  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiDeleteBucketUnprotectedIdRoute: typeof ApiDeleteBucketUnprotectedIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,11 +227,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnprotectedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected': {
-      id: '/_protected'
+    '/_organizational': {
+      id: '/_organizational'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof ProtectedRouteImport
+      preLoaderRoute: typeof OrganizationalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -196,20 +246,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/preprocess/session-org-init': {
-      id: '/preprocess/session-org-init'
-      path: '/preprocess/session-org-init'
-      fullPath: '/preprocess/session-org-init'
-      preLoaderRoute: typeof PreprocessSessionOrgInitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/preprocess/account-setup': {
-      id: '/preprocess/account-setup'
-      path: '/preprocess/account-setup'
-      fullPath: '/preprocess/account-setup'
-      preLoaderRoute: typeof PreprocessAccountSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_unprotected/sign-up': {
@@ -226,70 +262,134 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnprotectedSignInRouteImport
       parentRoute: typeof UnprotectedRoute
     }
-    '/_protected/main': {
-      id: '/_protected/main'
+    '/_organizational/dashboard': {
+      id: '/_organizational/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof OrganizationalDashboardRouteImport
+      parentRoute: typeof OrganizationalRoute
+    }
+    '/_authenticated/main': {
+      id: '/_authenticated/main'
       path: '/main'
       fullPath: '/main'
-      preLoaderRoute: typeof ProtectedMainRouteImport
-      parentRoute: typeof ProtectedRoute
+      preLoaderRoute: typeof AuthenticatedMainRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/api/delete-bucket-unprotected/$id': {
-      id: '/api/delete-bucket-unprotected/$id'
+    '/_authenticated/preprocess/session-org-init': {
+      id: '/_authenticated/preprocess/session-org-init'
+      path: '/preprocess/session-org-init'
+      fullPath: '/preprocess/session-org-init'
+      preLoaderRoute: typeof AuthenticatedPreprocessSessionOrgInitRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/preprocess/account-setup': {
+      id: '/_authenticated/preprocess/account-setup'
+      path: '/preprocess/account-setup'
+      fullPath: '/preprocess/account-setup'
+      preLoaderRoute: typeof AuthenticatedPreprocessAccountSetupRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_unprotected/api/electric/public-organizations': {
+      id: '/_unprotected/api/electric/public-organizations'
+      path: '/api/electric/public-organizations'
+      fullPath: '/api/electric/public-organizations'
+      preLoaderRoute: typeof UnprotectedApiElectricPublicOrganizationsRouteImport
+      parentRoute: typeof UnprotectedRoute
+    }
+    '/_unprotected/api/delete-bucket-unprotected/$id': {
+      id: '/_unprotected/api/delete-bucket-unprotected/$id'
       path: '/api/delete-bucket-unprotected/$id'
       fullPath: '/api/delete-bucket-unprotected/$id'
-      preLoaderRoute: typeof ApiDeleteBucketUnprotectedIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof UnprotectedApiDeleteBucketUnprotectedIdRouteImport
+      parentRoute: typeof UnprotectedRoute
     }
-    '/api/auth/$': {
-      id: '/api/auth/$'
+    '/_unprotected/api/auth/$': {
+      id: '/_unprotected/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof UnprotectedApiAuthSplatRouteImport
+      parentRoute: typeof UnprotectedRoute
     }
-    '/_protected/api/electric/self-owned-resources': {
-      id: '/_protected/api/electric/self-owned-resources'
-      path: '/api/electric/self-owned-resources'
-      fullPath: '/api/electric/self-owned-resources'
-      preLoaderRoute: typeof ProtectedApiElectricSelfOwnedResourcesRouteImport
-      parentRoute: typeof ProtectedRoute
+    '/_organizational/api/electric/self-resource-roles': {
+      id: '/_organizational/api/electric/self-resource-roles'
+      path: '/api/electric/self-resource-roles'
+      fullPath: '/api/electric/self-resource-roles'
+      preLoaderRoute: typeof OrganizationalApiElectricSelfResourceRolesRouteImport
+      parentRoute: typeof OrganizationalRoute
     }
-    '/_protected/api/electric/resource-role-assignment': {
-      id: '/_protected/api/electric/resource-role-assignment'
-      path: '/api/electric/resource-role-assignment'
-      fullPath: '/api/electric/resource-role-assignment'
-      preLoaderRoute: typeof ProtectedApiElectricResourceRoleAssignmentRouteImport
-      parentRoute: typeof ProtectedRoute
+    '/_organizational/api/electric/self-organization-members': {
+      id: '/_organizational/api/electric/self-organization-members'
+      path: '/api/electric/self-organization-members'
+      fullPath: '/api/electric/self-organization-members'
+      preLoaderRoute: typeof OrganizationalApiElectricSelfOrganizationMembersRouteImport
+      parentRoute: typeof OrganizationalRoute
+    }
+    '/_authenticated/api/electric/self-organizations': {
+      id: '/_authenticated/api/electric/self-organizations'
+      path: '/api/electric/self-organizations'
+      fullPath: '/api/electric/self-organizations'
+      preLoaderRoute: typeof AuthenticatedApiElectricSelfOrganizationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
-interface ProtectedRouteChildren {
-  ProtectedMainRoute: typeof ProtectedMainRoute
-  ProtectedApiElectricResourceRoleAssignmentRoute: typeof ProtectedApiElectricResourceRoleAssignmentRoute
-  ProtectedApiElectricSelfOwnedResourcesRoute: typeof ProtectedApiElectricSelfOwnedResourcesRoute
+interface AuthenticatedRouteChildren {
+  AuthenticatedMainRoute: typeof AuthenticatedMainRoute
+  AuthenticatedPreprocessAccountSetupRoute: typeof AuthenticatedPreprocessAccountSetupRoute
+  AuthenticatedPreprocessSessionOrgInitRoute: typeof AuthenticatedPreprocessSessionOrgInitRoute
+  AuthenticatedApiElectricSelfOrganizationsRoute: typeof AuthenticatedApiElectricSelfOrganizationsRoute
 }
 
-const ProtectedRouteChildren: ProtectedRouteChildren = {
-  ProtectedMainRoute: ProtectedMainRoute,
-  ProtectedApiElectricResourceRoleAssignmentRoute:
-    ProtectedApiElectricResourceRoleAssignmentRoute,
-  ProtectedApiElectricSelfOwnedResourcesRoute:
-    ProtectedApiElectricSelfOwnedResourcesRoute,
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedMainRoute: AuthenticatedMainRoute,
+  AuthenticatedPreprocessAccountSetupRoute:
+    AuthenticatedPreprocessAccountSetupRoute,
+  AuthenticatedPreprocessSessionOrgInitRoute:
+    AuthenticatedPreprocessSessionOrgInitRoute,
+  AuthenticatedApiElectricSelfOrganizationsRoute:
+    AuthenticatedApiElectricSelfOrganizationsRoute,
 }
 
-const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
-  ProtectedRouteChildren,
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
+interface OrganizationalRouteChildren {
+  OrganizationalDashboardRoute: typeof OrganizationalDashboardRoute
+  OrganizationalApiElectricSelfOrganizationMembersRoute: typeof OrganizationalApiElectricSelfOrganizationMembersRoute
+  OrganizationalApiElectricSelfResourceRolesRoute: typeof OrganizationalApiElectricSelfResourceRolesRoute
+}
+
+const OrganizationalRouteChildren: OrganizationalRouteChildren = {
+  OrganizationalDashboardRoute: OrganizationalDashboardRoute,
+  OrganizationalApiElectricSelfOrganizationMembersRoute:
+    OrganizationalApiElectricSelfOrganizationMembersRoute,
+  OrganizationalApiElectricSelfResourceRolesRoute:
+    OrganizationalApiElectricSelfResourceRolesRoute,
+}
+
+const OrganizationalRouteWithChildren = OrganizationalRoute._addFileChildren(
+  OrganizationalRouteChildren,
 )
 
 interface UnprotectedRouteChildren {
   UnprotectedSignInRoute: typeof UnprotectedSignInRoute
   UnprotectedSignUpRoute: typeof UnprotectedSignUpRoute
+  UnprotectedApiAuthSplatRoute: typeof UnprotectedApiAuthSplatRoute
+  UnprotectedApiDeleteBucketUnprotectedIdRoute: typeof UnprotectedApiDeleteBucketUnprotectedIdRoute
+  UnprotectedApiElectricPublicOrganizationsRoute: typeof UnprotectedApiElectricPublicOrganizationsRoute
 }
 
 const UnprotectedRouteChildren: UnprotectedRouteChildren = {
   UnprotectedSignInRoute: UnprotectedSignInRoute,
   UnprotectedSignUpRoute: UnprotectedSignUpRoute,
+  UnprotectedApiAuthSplatRoute: UnprotectedApiAuthSplatRoute,
+  UnprotectedApiDeleteBucketUnprotectedIdRoute:
+    UnprotectedApiDeleteBucketUnprotectedIdRoute,
+  UnprotectedApiElectricPublicOrganizationsRoute:
+    UnprotectedApiElectricPublicOrganizationsRoute,
 }
 
 const UnprotectedRouteWithChildren = UnprotectedRoute._addFileChildren(
@@ -298,12 +398,9 @@ const UnprotectedRouteWithChildren = UnprotectedRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ProtectedRoute: ProtectedRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  OrganizationalRoute: OrganizationalRouteWithChildren,
   UnprotectedRoute: UnprotectedRouteWithChildren,
-  PreprocessAccountSetupRoute: PreprocessAccountSetupRoute,
-  PreprocessSessionOrgInitRoute: PreprocessSessionOrgInitRoute,
-  ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiDeleteBucketUnprotectedIdRoute: ApiDeleteBucketUnprotectedIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

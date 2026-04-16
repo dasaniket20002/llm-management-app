@@ -1,5 +1,91 @@
 import type { PrismaTransaction } from '../db/db'
-import type { PrismaClient } from '../db/generated/client'
+import type {
+  PrismaClient,
+  UserOrgStatus,
+  Visibility,
+} from '../db/generated/client'
+
+export async function createOrganizationResourceService({
+  name,
+  identifier,
+  imageFileId,
+  storageBucketId,
+  currentUserId,
+  visibility = 'public',
+  prisma,
+}: {
+  name: string
+  identifier: string
+  imageFileId?: string
+  storageBucketId: string
+  currentUserId: string
+  visibility?: Visibility
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.resource.create({
+    data: {
+      resourceType: 'organization',
+      createdById: currentUserId,
+      visibility,
+      organization: {
+        create: {
+          name,
+          identifier,
+          imageFileId,
+          storageBucketId,
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+}
+
+export async function addMemberToOrganization({
+  organizationId,
+  userId,
+  status,
+  prisma,
+}: {
+  organizationId: string
+  userId: string
+  status: Extract<UserOrgStatus, 'invited' | 'requested' | 'active'>
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return prisma.userOrganization.create({
+    data: {
+      status,
+      userId,
+      organizationId,
+    },
+  })
+}
+
+export async function updateUserMembershipStatus({
+  organizationId,
+  userId,
+  status,
+  prisma,
+}: {
+  organizationId: string
+  userId: string
+  status: Exclude<UserOrgStatus, 'invited' | 'requested'>
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return prisma.userOrganization.update({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId,
+      },
+    },
+    data: {
+      status,
+      joinedAt: status === 'active' ? new Date() : undefined,
+    },
+  })
+}
 
 export async function updateOrganizationMemberUsername({
   userId,
@@ -63,6 +149,37 @@ export async function updateOrganizationMemberAvatar({
     select: {
       userId: true,
       organizationId: true,
+    },
+  })
+}
+
+export async function getPublicOrganizationsService({
+  prisma,
+}: {
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.resource.findMany({
+    where: {
+      visibility: 'public',
+      resourceType: 'organization',
+    },
+    select: { organization: true },
+  })
+}
+
+export async function getUserOrganizationsService({
+  userId,
+  prisma,
+}: {
+  userId: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.userOrganization.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      organization: true,
     },
   })
 }

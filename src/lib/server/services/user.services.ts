@@ -1,5 +1,46 @@
 import type { PrismaTransaction } from '../db/db'
-import type { PrismaClient } from '../db/generated/client'
+import type { PrismaClient, Visibility } from '../db/generated/client'
+
+export async function createUserResourceService({
+  name,
+  email,
+  emailVerified = false,
+  imageFileId,
+  username,
+  currentUserId,
+  visibility = 'private',
+  prisma,
+}: {
+  name: string
+  email: string
+  emailVerified?: boolean
+  imageFileId?: string
+  username: string
+  currentUserId: string
+  visibility?: Visibility
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.resource.create({
+    data: {
+      resourceType: 'user',
+      createdById: currentUserId,
+      visibility,
+      user: {
+        create: {
+          name,
+          email,
+          emailVerified,
+          imageFileId,
+          username,
+          displayUsername: username.toLowerCase(),
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+}
 
 export async function updateUsernameService({
   userId,

@@ -197,7 +197,7 @@ export type OrganizationWhereInput = {
   imageFileId?: Prisma.UuidNullableFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
-  storageBucketId?: Prisma.UuidFilter<"Organization"> | string
+  storageBucketId?: Prisma.StringFilter<"Organization"> | string
   imageFile?: Prisma.XOR<Prisma.FileNullableScalarRelationFilter, Prisma.FileWhereInput> | null
   resource?: Prisma.XOR<Prisma.ResourceScalarRelationFilter, Prisma.ResourceWhereInput>
   members?: Prisma.UserOrganizationListRelationFilter
@@ -258,7 +258,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   imageFileId?: Prisma.UuidNullableWithAggregatesFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
-  storageBucketId?: Prisma.UuidWithAggregatesFilter<"Organization"> | string
+  storageBucketId?: Prisma.StringWithAggregatesFilter<"Organization"> | string
 }
 
 export type OrganizationCreateInput = {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AppContext, THEMES, TOAST_POSITIONS } from './app-context'
 import type { Theme, ToastPosition } from './app-context'
+import { TooltipProvider } from '#/components/ui/tooltip'
 
 const LOCAL_KEYS = {
   theme: 'theme',
@@ -86,7 +87,7 @@ export default function AppProvider({
     <AppContext.Provider
       value={{ theme, toggleTheme, setTheme, toastPosition, setToastPosition }}
     >
-      {children}
+      <TooltipProvider>{children}</TooltipProvider>
     </AppContext.Provider>
   )
 }

@@ -146,7 +146,6 @@ export const FileScalarFieldEnum = {
   id: 'id',
   originalName: 'originalName',
   displayName: 'displayName',
-  mimeType: 'mimeType',
   extension: 'extension',
   sizeBytes: 'sizeBytes',
   storageKey: 'storageKey',

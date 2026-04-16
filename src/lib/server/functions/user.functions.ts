@@ -5,17 +5,77 @@ import {
 } from '#/lib/types/server-fn'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+import { generateTxId } from '../db/db'
 import { createFileResourceService } from '../services/file.services'
 import {
   checkPermissionService,
   grantRoleService,
 } from '../services/permission.services'
 import {
+  createUserResourceService,
   updateUserAvatarService,
   updateUserBucketService,
   updateUsernameService,
 } from '../services/user.services'
-import { authMiddleware } from './auth.functions'
+import {
+  authMiddleware,
+  authMiddlewareWithOrganization,
+} from './auth.functions'
+import type { Visibility } from '../db/generated/enums'
+
+export const createUserResource = createServerFn({ method: 'POST' })
+  .middleware([authMiddlewareWithOrganization])
+  .inputValidator(
+    (data: {
+      name: string
+      email: string
+      emailVerified?: boolean
+      imageFileId?: string
+      username: string
+      visibility?: Visibility
+    }) => data,
+  )
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const txid = await generateTxId(tx)
+
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: context.session.session.organizationId,
+        permission: 'create:user',
+        prisma: tx,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          permissionsRequired: 'create:user',
+          txid,
+        })
+
+      const user = await createUserResourceService({
+        ...data,
+        currentUserId: context.session.user.id,
+        prisma: tx,
+      })
+
+      const roleOwnerPromise = grantRoleService({
+        currentUserId: context.session.user.id,
+        subjectResourceId: context.session.session.organizationId,
+        targetResourceId: user.id,
+        role: 'user_owner',
+        prisma: tx,
+      })
+      const roleManagedPromise = grantRoleService({
+        currentUserId: context.session.user.id,
+        subjectResourceId: user.id,
+        targetResourceId: user.id,
+        role: 'user_managed',
+        prisma: tx,
+      })
+      await Promise.all([roleOwnerPromise, roleManagedPromise])
+
+      return serverFnSuccessResponse('Created', { user, txid })
+    }),
+  )
 
 export const isPasswordSet = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -170,6 +230,7 @@ export const updateUserAvatar = createServerFn({ method: 'POST' })
         sizeBytes: data.sizeBytes,
         storageKey: data.storageKey,
         storageBucketId: bucket.storageBucketId!,
+        visibility: 'public',
         prisma: tx,
       })
       await grantRoleService({

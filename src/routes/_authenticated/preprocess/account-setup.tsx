@@ -19,7 +19,6 @@ import {
 import { Input } from '#/components/ui/input'
 import { Spinner } from '#/components/ui/spinner'
 import { authClient } from '#/lib/auth-client'
-import { ensureSession } from '#/lib/server/functions/auth.functions'
 import {
   isPasskeySet,
   isPasswordSet,
@@ -34,10 +33,10 @@ import { ArrowRight, Plus } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
-export const Route = createFileRoute('/preprocess/account-setup')({
-  beforeLoad: async () => {
-    const data = await ensureSession()
-
+export const Route = createFileRoute(
+  '/_authenticated/preprocess/account-setup',
+)({
+  beforeLoad: async ({ context }) => {
     const usernameSetPromise = isUsernameSet()
     const passwordSetPromise = isPasswordSet()
     const passkeySetPromise = isPasskeySet()
@@ -48,10 +47,11 @@ export const Route = createFileRoute('/preprocess/account-setup')({
       passkeySetPromise,
     ])
 
-    if (usernameSet.data && passwordSet.data) throw redirect({ to: '/main' })
+    if (usernameSet.data && passwordSet.data)
+      throw redirect({ to: '/dashboard' })
 
     return {
-      session: data.data,
+      session: context.session,
       usernameSet: usernameSet.data,
       passwordSet: passwordSet.data,
       passkeySet: passkeySet.data,
@@ -73,7 +73,6 @@ function RouteComponent() {
     },
     onSubmit: async ({ value }) => {
       let success = true
-      console.log('submit')
 
       if (!usernameSet) {
         const usernameRes = await updateUsername({
@@ -98,8 +97,7 @@ function RouteComponent() {
         else toast.error(passwordRes.error)
       }
 
-      console.log(success)
-      if (success) navigate({ to: '/main' })
+      if (success) navigate({ to: '/dashboard' })
       else navigate({ to: '/preprocess/account-setup' })
     },
   })
@@ -420,7 +418,7 @@ function RouteComponent() {
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      navigate({ to: '/main' })
+                      navigate({ to: '/dashboard' })
                     }}
                     disabled={form.state.isSubmitting}
                   >

@@ -5,7 +5,7 @@ import {
 } from '#/lib/server/functions/auth.functions'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/_protected')({
+export const Route = createFileRoute('/_organizational')({
   server: {
     middleware: [authMiddlewareWithOrganization],
   },

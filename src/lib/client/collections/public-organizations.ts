@@ -1,17 +1,17 @@
-import { createCollection } from '@tanstack/react-db'
-import { electricCollectionOptions } from '@tanstack/electric-db-collection'
-import z from 'zod'
+import { organizationSchema } from '#/lib/types/collection-schemas/organization'
 import { getElectricUrl } from '#/lib/utils/electric'
 import { snakeCamelMapper } from '@electric-sql/client'
+import { electricCollectionOptions } from '@tanstack/electric-db-collection'
+import { createCollection } from '@tanstack/react-db'
 
 export const organizationCollection = createCollection(
   electricCollectionOptions({
     shapeOptions: {
-      url: `${getElectricUrl()}/self-organizations`,
+      url: `${getElectricUrl()}/public-organizations`,
       parser: { timestamptz: (date: string) => new Date(date) },
       columnMapper: snakeCamelMapper(),
     },
-    schema: z.object({ id: z.string(), crea: z.date() }),
+    schema: organizationSchema,
     getKey: (item) => item.id,
   }),
 )
