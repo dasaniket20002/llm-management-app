@@ -10,11 +10,12 @@ import type { Role } from '../db/roles_permissions'
 import { createFileResourceService } from '../services/file.services'
 import { createBucketService } from '../services/minio.services'
 import {
-  addMemberToOrganization,
+  addMemberToOrganizationService,
   createOrganizationResourceService,
   getPublicOrganizationsService,
   getUserOrganizationsService,
-  updateOrganizationMemberUsername,
+  updateOrganizationMemberUsernameService,
+  updateOrganizationResourceService,
 } from '../services/organization.services'
 import {
   checkPermissionService,
@@ -30,13 +31,8 @@ import {
 export const createOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(
-    (data: {
-      name: string
-      identifier: string
-      imageFileId?: string
-      imageFileExtension?: string
-      visibility: Visibility
-    }) => data,
+    (data: { name: string; identifier: string; visibility: Visibility }) =>
+      data,
   )
   .handler(async ({ data, context }) =>
     context.prisma.$transaction(async (tx) => {
@@ -64,11 +60,10 @@ export const createOrganizationResource = createServerFn({ method: 'POST' })
         identifier: data.identifier,
         storageBucketId: bucketId,
         visibility: data.visibility,
-        imageFileId: data.imageFileId,
         prisma: tx,
       })
 
-      const addMemberPromise = addMemberToOrganization({
+      const addMemberPromise = addMemberToOrganizationService({
         organizationId: organization.id,
         userId: context.session.user.id,
         status: 'active',
@@ -86,6 +81,35 @@ export const createOrganizationResource = createServerFn({ method: 'POST' })
       return serverFnSuccessResponse('Created', { organization, txid })
     }),
   )
+
+export const updateOrganizationResource = createServerFn({ method: 'POST' })
+  .middleware([authMiddlewareWithOrganization])
+  .inputValidator(
+    (data: { name?: string; identifier?: string; imageFileId?: string }) =>
+      data,
+  )
+  .handler(async ({ data, context }) => {
+    const hasPermission = await checkPermissionService({
+      subjectResourceId: context.session.user.id,
+      targetResourceId: context.session.session.organizationId,
+      permission: 'update:organization',
+      prisma: context.prisma,
+    })
+    if (!hasPermission)
+      return serverFnErrorResponse('Unauthorized', {
+        permissionsRequired: 'update:organization',
+      })
+
+    const organization = await updateOrganizationResourceService({
+      id: context.session.session.organizationId,
+      name: data.name,
+      identifier: data.identifier,
+      imageFileId: data.imageFileId,
+      prisma: context.prisma,
+    })
+
+    return serverFnSuccessResponse('Updated', { organization })
+  })
 
 export const organizationIdentifierAvailable = createServerFn({
   method: 'POST',
@@ -124,7 +148,7 @@ export const updateMemberUsername = createServerFn({ method: 'POST' })
         permissionsRequired: 'update_username:user',
       })
 
-    const updated = await updateOrganizationMemberUsername({
+    const updated = await updateOrganizationMemberUsernameService({
       userId: data.userId,
       organizationId: context.session.session.organizationId,
       username: data.newUsername,

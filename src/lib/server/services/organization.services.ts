@@ -42,7 +42,40 @@ export async function createOrganizationResourceService({
   })
 }
 
-export async function addMemberToOrganization({
+export function updateOrganizationResourceService({
+  id,
+  name,
+  identifier,
+  imageFileId,
+  visibility = 'public',
+  prisma,
+}: {
+  id: string
+  name?: string
+  identifier?: string
+  imageFileId?: string
+  visibility?: Visibility
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return prisma.resource.update({
+    where: { id },
+    data: {
+      visibility,
+      organization: {
+        update: {
+          name,
+          identifier,
+          imageFileId,
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+}
+
+export async function addMemberToOrganizationService({
   organizationId,
   userId,
   status,
@@ -62,7 +95,7 @@ export async function addMemberToOrganization({
   })
 }
 
-export async function updateUserMembershipStatus({
+export async function updateUserMembershipStatusService({
   organizationId,
   userId,
   status,
@@ -87,7 +120,7 @@ export async function updateUserMembershipStatus({
   })
 }
 
-export async function updateOrganizationMemberUsername({
+export async function updateOrganizationMemberUsernameService({
   userId,
   organizationId,
   username,
@@ -120,7 +153,7 @@ export async function updateOrganizationMemberUsername({
   })
 }
 
-export async function updateOrganizationMemberAvatar({
+export async function updateOrganizationMemberAvatarService({
   userId,
   organizationId,
   imageFileId,
