@@ -12,6 +12,8 @@ import { createBucketService } from '../services/minio.services'
 import {
   addMemberToOrganizationService,
   createOrganizationResourceService,
+  deleteOrganizationResourceService,
+  getOrganizationService,
   getPublicOrganizationsService,
   getUserOrganizationsService,
   updateOrganizationMemberUsernameService,
@@ -27,6 +29,34 @@ import {
   authMiddlewareWithOrganization,
   dbMiddleware,
 } from './auth.functions'
+
+export const getOrganizationDetails = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const txid = await generateTxId(tx)
+
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: context.session.user.id,
+        permission: 'read:organization',
+        prisma: tx,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          permissionsRequired: 'read:organization',
+          txid,
+        })
+
+      const organization = await getOrganizationService({
+        id: data.id,
+        prisma: tx,
+      })
+      if (!organization) return serverFnErrorResponse('Not Found', { txid })
+      return serverFnSuccessResponse('Success', { organization, txid })
+    }),
+  )
 
 export const createOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
@@ -83,33 +113,72 @@ export const createOrganizationResource = createServerFn({ method: 'POST' })
   )
 
 export const updateOrganizationResource = createServerFn({ method: 'POST' })
-  .middleware([authMiddlewareWithOrganization])
+  .middleware([authMiddleware])
   .inputValidator(
-    (data: { name?: string; identifier?: string; imageFileId?: string }) =>
-      data,
+    (data: {
+      id: string
+      name?: string
+      identifier?: string
+      imageFileId?: string
+      visibility?: Visibility
+    }) => data,
   )
-  .handler(async ({ data, context }) => {
-    const hasPermission = await checkPermissionService({
-      subjectResourceId: context.session.user.id,
-      targetResourceId: context.session.session.organizationId,
-      permission: 'update:organization',
-      prisma: context.prisma,
-    })
-    if (!hasPermission)
-      return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'update:organization',
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const txid = await generateTxId(tx)
+
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: data.id,
+        permission: 'update:organization',
+        prisma: context.prisma,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          permissionsRequired: 'update:organization',
+          txid,
+        })
+
+      const organization = await updateOrganizationResourceService({
+        id: data.id,
+        name: data.name,
+        identifier: data.identifier,
+        imageFileId: data.imageFileId,
+        visibility: data.visibility,
+        prisma: context.prisma,
       })
 
-    const organization = await updateOrganizationResourceService({
-      id: context.session.session.organizationId,
-      name: data.name,
-      identifier: data.identifier,
-      imageFileId: data.imageFileId,
-      prisma: context.prisma,
-    })
+      return serverFnSuccessResponse('Updated', { organization, txid })
+    }),
+  )
 
-    return serverFnSuccessResponse('Updated', { organization })
-  })
+export const deleteOrganizationResource = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const txid = await generateTxId(tx)
+
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: data.id,
+        permission: 'delete:organization',
+        prisma: context.prisma,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          permissionsRequired: 'delete:organization',
+          txid,
+        })
+
+      const organization = await deleteOrganizationResourceService({
+        id: data.id,
+        prisma: tx,
+      })
+
+      return serverFnSuccessResponse('Deleted', { organization, txid })
+    }),
+  )
 
 export const organizationIdentifierAvailable = createServerFn({
   method: 'POST',

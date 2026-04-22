@@ -42,7 +42,7 @@ export async function createOrganizationResourceService({
   })
 }
 
-export function updateOrganizationResourceService({
+export async function updateOrganizationResourceService({
   id,
   name,
   identifier,
@@ -57,7 +57,7 @@ export function updateOrganizationResourceService({
   visibility?: Visibility
   prisma: PrismaClient | PrismaTransaction
 }) {
-  return prisma.resource.update({
+  return await prisma.resource.update({
     where: { id },
     data: {
       visibility,
@@ -75,6 +75,19 @@ export function updateOrganizationResourceService({
   })
 }
 
+export async function deleteOrganizationResourceService({
+  id,
+  prisma,
+}: {
+  id: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.$transaction(async (tx) => {
+    await tx.organization.delete({ where: { id } })
+    return await tx.resource.delete({ where: { id }, select: { id: true } })
+  })
+}
+
 export async function addMemberToOrganizationService({
   organizationId,
   userId,
@@ -86,7 +99,7 @@ export async function addMemberToOrganizationService({
   status: Extract<UserOrgStatus, 'invited' | 'requested' | 'active'>
   prisma: PrismaClient | PrismaTransaction
 }) {
-  return prisma.userOrganization.create({
+  return await prisma.userOrganization.create({
     data: {
       status,
       userId,
@@ -106,7 +119,7 @@ export async function updateUserMembershipStatusService({
   status: Exclude<UserOrgStatus, 'invited' | 'requested'>
   prisma: PrismaClient | PrismaTransaction
 }) {
-  return prisma.userOrganization.update({
+  return await prisma.userOrganization.update({
     where: {
       organizationId_userId: {
         organizationId,
@@ -215,4 +228,14 @@ export async function getUserOrganizationsService({
       organization: true,
     },
   })
+}
+
+export async function getOrganizationService({
+  id,
+  prisma,
+}: {
+  id: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.organization.findUnique({ where: { id } })
 }
