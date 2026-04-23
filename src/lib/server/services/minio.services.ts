@@ -48,7 +48,7 @@ export async function deleteBucketService({ bucketId }: { bucketId: string }) {
   await minio.removeBucket(bucketId)
 }
 
-export async function getPresignedGeteUrlService({
+export async function getPresignedGetUrlService({
   storageKey,
   bucketId,
   expireTime = 24 * 60 * 60, // 24 hours // 1 day

@@ -4,7 +4,7 @@ import { snakeCamelMapper } from '@electric-sql/client'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
 import { createCollection } from '@tanstack/react-db'
 
-export const organizationCollection = createCollection(
+export const publicOrganizationCollection = createCollection(
   electricCollectionOptions({
     shapeOptions: {
       url: `${getElectricUrl()}/public-organizations`,

@@ -6,7 +6,6 @@ export const env = createEnv({
     NODE_ENV: z.string().optional().default('development'),
 
     DATABASE_URL: z.url(),
-    REDIS_URL: z.url(),
 
     ELECTRIC_URL: z.url(),
     ELECTRIC_SECRET: z.string(),
@@ -38,7 +37,6 @@ export const env = createEnv({
     ELECTRIC_SECRET: process.env.ELECTRIC_SECRET,
 
     DATABASE_URL: process.env.DATABASE_URL,
-    REDIS_URL: process.env.REDIS_URL,
 
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 

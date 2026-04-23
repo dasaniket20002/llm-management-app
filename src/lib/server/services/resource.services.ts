@@ -24,3 +24,16 @@ export async function createResourceService({
 
   return resource
 }
+
+export async function getResourceDetailsService({
+  id,
+  prisma,
+}: {
+  id: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.resource.findUnique({
+    where: { id },
+    include: { organization: true, user: true, file: true },
+  })
+}

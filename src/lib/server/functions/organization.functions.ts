@@ -3,7 +3,6 @@ import {
   serverFnSuccessResponse,
 } from '#/lib/types/server-fn'
 import { createServerFn } from '@tanstack/react-start'
-import z from 'zod'
 import { generateTxId } from '../db/db'
 import type { Visibility } from '../db/generated/enums'
 import type { Role } from '../db/roles_permissions'
@@ -33,30 +32,25 @@ import {
 export const getOrganizationDetails = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { id: string }) => data)
-  .handler(async ({ data, context }) =>
-    context.prisma.$transaction(async (tx) => {
-      const txid = await generateTxId(tx)
-
-      const hasPermission = await checkPermissionService({
-        subjectResourceId: context.session.user.id,
-        targetResourceId: context.session.user.id,
-        permission: 'read:organization',
-        prisma: tx,
+  .handler(async ({ data, context }) => {
+    const hasPermission = await checkPermissionService({
+      subjectResourceId: context.session.user.id,
+      targetResourceId: context.session.user.id,
+      permission: 'read:organization',
+      prisma: context.prisma,
+    })
+    if (!hasPermission)
+      return serverFnErrorResponse('Unauthorized', {
+        permissionsRequired: 'read:organization',
       })
-      if (!hasPermission)
-        return serverFnErrorResponse('Unauthorized', {
-          permissionsRequired: 'read:organization',
-          txid,
-        })
 
-      const organization = await getOrganizationService({
-        id: data.id,
-        prisma: tx,
-      })
-      if (!organization) return serverFnErrorResponse('Not Found', { txid })
-      return serverFnSuccessResponse('Success', { organization, txid })
-    }),
-  )
+    const organization = await getOrganizationService({
+      id: data.id,
+      prisma: context.prisma,
+    })
+    if (!organization) return serverFnErrorResponse('Not Found')
+    return serverFnSuccessResponse('Success', { organization })
+  })
 
 export const createOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
@@ -184,22 +178,14 @@ export const organizationIdentifierAvailable = createServerFn({
   method: 'POST',
 })
   .middleware([dbMiddleware])
-  .inputValidator((data) =>
-    z.object({ identifier: z.string() }).safeParse(data),
-  )
+  .inputValidator((data: { identifier: string }) => data)
   .handler(async ({ data, context }) => {
-    if (!data.success) return serverFnErrorResponse('Validation Error', null)
-    const inputData = data.data
-
     const org = await context.prisma.organization.findUnique({
-      where: { identifier: inputData.identifier },
+      where: { identifier: data.identifier },
     })
 
     const available = !org
-    return serverFnSuccessResponse(
-      available ? 'Identifer Valid' : 'Identifier Invalid',
-      available,
-    )
+    return serverFnSuccessResponse('Success', { available })
   })
 
 export const updateMemberUsername = createServerFn({ method: 'POST' })

@@ -26,7 +26,6 @@ export function prepareElectricUrl(
   electricRequestURL.searchParams.set(`secret`, env.ELECTRIC_SECRET)
 
   if (where) {
-    console.log(where.where.trim().replace(/\s+/g, ' '))
     electricRequestURL.searchParams.set(
       `where`,
       where.where.trim().replace(/\s+/g, ' '),

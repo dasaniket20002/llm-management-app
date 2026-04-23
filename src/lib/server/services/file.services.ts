@@ -60,3 +60,13 @@ export async function downloadFileService({ link }: { link: string }) {
 
   return { imageBuffer, contentType, extension }
 }
+
+export async function getFileDetailsService({
+  id,
+  prisma,
+}: {
+  id: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.file.findUnique({ where: { id } })
+}
