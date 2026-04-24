@@ -4,10 +4,13 @@ export type ServerFnSuccess<TMessage extends SuccessMessages, TData> = {
   data: TData
 }
 
-export type ServerFnError<TError extends ErrorMessages, TData = undefined> = {
+export type ServerFnError<
+  TError extends ErrorMessages,
+  TData extends { message: string },
+> = {
   success: false
   error: TError
-  data?: TData
+  data: TData
 }
 
 export function serverFnSuccessResponse<
@@ -23,8 +26,8 @@ export function serverFnSuccessResponse<
 
 export function serverFnErrorResponse<
   TError extends ErrorMessages,
-  TData = undefined,
->(error: TError, data?: TData): ServerFnError<TError, TData> {
+  TData extends { message: string },
+>(error: TError, data: TData): ServerFnError<TError, TData> {
   return {
     success: false,
     error,

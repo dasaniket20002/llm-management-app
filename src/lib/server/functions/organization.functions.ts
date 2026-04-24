@@ -29,9 +29,19 @@ import {
   dbMiddleware,
 } from './auth.functions'
 
+/**
+ * Retrieves details of a specific organization by ID.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.organizationId - The ID of the organization to retrieve.
+ * @returns A success response containing the organization object.
+ * @throws Returns error if user lacks 'read:organization' permission or org not found.
+ * @example
+ * const { data } = await getOrganizationDetails({ organizationId: 'org_123' })
+ */
 export const getOrganizationDetails = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator((data: { organizationId: string }) => data)
   .handler(async ({ data, context }) => {
     const hasPermission = await checkPermissionService({
       subjectResourceId: context.session.user.id,
@@ -41,17 +51,36 @@ export const getOrganizationDetails = createServerFn({ method: 'POST' })
     })
     if (!hasPermission)
       return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'read:organization',
+        message: 'Permission required - read:organization',
       })
 
     const organization = await getOrganizationService({
-      id: data.id,
+      id: data.organizationId,
       prisma: context.prisma,
     })
-    if (!organization) return serverFnErrorResponse('Not Found')
+    if (!organization)
+      return serverFnErrorResponse('Not Found', {
+        message: `Organization not found with ID - ${data.organizationId}`,
+      })
     return serverFnSuccessResponse('Success', { organization })
   })
 
+/**
+ * Creates a new organization, storage bucket, and adds creator as owner.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.name - Display name of the organization.
+ * @param data.identifier - Unique URL-friendly identifier.
+ * @param data.visibility - Visibility setting (public/private).
+ * @returns A success response containing the created organization and transaction ID.
+ * @throws Returns error if user lacks 'create:organization' permission.
+ * @example
+ * const { data } = await createOrganizationResource({
+ *   name: 'My Org',
+ *   identifier: 'my-org',
+ *   visibility: 'private'
+ * })
+ */
 export const createOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(
@@ -70,7 +99,7 @@ export const createOrganizationResource = createServerFn({ method: 'POST' })
       })
       if (!hasPermission)
         return serverFnErrorResponse('Unauthorized', {
-          permissionsRequired: 'create:organization',
+          message: 'Permission required - create:organization',
           txid,
         })
 
@@ -106,6 +135,23 @@ export const createOrganizationResource = createServerFn({ method: 'POST' })
     }),
   )
 
+/**
+ * Updates an organization's properties (name, identifier, image, visibility).
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.id - The ID of the organization to update.
+ * @param data.name - Optional new display name.
+ * @param data.identifier - Optional new unique identifier.
+ * @param data.imageFileId - Optional new image file ID.
+ * @param data.visibility - Optional new visibility setting.
+ * @returns A success response containing the updated organization and transaction ID.
+ * @throws Returns error if user lacks 'update:organization' permission.
+ * @example
+ * const { data } = await updateOrganizationResource({
+ *   id: 'org_123',
+ *   name: 'New Name'
+ * })
+ */
 export const updateOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(
@@ -129,7 +175,7 @@ export const updateOrganizationResource = createServerFn({ method: 'POST' })
       })
       if (!hasPermission)
         return serverFnErrorResponse('Unauthorized', {
-          permissionsRequired: 'update:organization',
+          message: 'Permission required - update:organization',
           txid,
         })
 
@@ -146,6 +192,16 @@ export const updateOrganizationResource = createServerFn({ method: 'POST' })
     }),
   )
 
+/**
+ * Deletes an organization and all associated data.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.id - The ID of the organization to delete.
+ * @returns A success response containing the deleted organization and transaction ID.
+ * @throws Returns error if user lacks 'delete:organization' permission.
+ * @example
+ * const { data } = await deleteOrganizationResource({ id: 'org_123' })
+ */
 export const deleteOrganizationResource = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { id: string }) => data)
@@ -161,7 +217,7 @@ export const deleteOrganizationResource = createServerFn({ method: 'POST' })
       })
       if (!hasPermission)
         return serverFnErrorResponse('Unauthorized', {
-          permissionsRequired: 'delete:organization',
+          message: 'Permission required - delete:organization',
           txid,
         })
 
@@ -174,6 +230,16 @@ export const deleteOrganizationResource = createServerFn({ method: 'POST' })
     }),
   )
 
+/**
+ * Checks if an organization identifier is available (not already taken).
+ * Requires dbMiddleware (no auth required).
+ *
+ * @param data.identifier - The identifier to check for availability.
+ * @returns A success response containing { available: boolean }.
+ * @example
+ * const { data } = await organizationIdentifierAvailable({ identifier: 'my-org' })
+ * if (data.available) { console.log('Identifier is available!') }
+ */
 export const organizationIdentifierAvailable = createServerFn({
   method: 'POST',
 })
@@ -188,6 +254,20 @@ export const organizationIdentifierAvailable = createServerFn({
     return serverFnSuccessResponse('Success', { available })
   })
 
+/**
+ * Updates a member's username within the current organization.
+ * Requires authentication via authMiddlewareWithOrganization.
+ *
+ * @param data.newUsername - The new username to set.
+ * @param data.userId - The ID of the user whose username to update.
+ * @returns A success response containing the updated membership.
+ * @throws Returns error if user lacks 'update_username:user' permission or user not found.
+ * @example
+ * const { data } = await updateMemberUsername({
+ *   newUsername: 'john_doe',
+ *   userId: 'user_456'
+ * })
+ */
 export const updateMemberUsername = createServerFn({ method: 'POST' })
   .middleware([authMiddlewareWithOrganization])
   .inputValidator((data: { newUsername: string; userId: string }) => data)
@@ -200,7 +280,7 @@ export const updateMemberUsername = createServerFn({ method: 'POST' })
     })
     if (!hasPermission)
       return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'update_username:user',
+        message: 'Permission required - update_username:user',
       })
 
     const updated = await updateOrganizationMemberUsernameService({
@@ -211,10 +291,34 @@ export const updateMemberUsername = createServerFn({ method: 'POST' })
     })
 
     if (!updated.organizationId || !updated.userId)
-      return serverFnErrorResponse('Not Found', null)
+      return serverFnErrorResponse('Not Found', {
+        message: `User not found with ID - ${data.userId}`,
+      })
     return serverFnSuccessResponse('Success', updated)
   })
 
+/**
+ * Updates a member's avatar by creating a new file resource and linking it.
+ * Requires authentication via authMiddlewareWithOrganization.
+ *
+ * @param data.originalName - Original filename of the avatar image.
+ * @param data.displayName - Optional display name for the image.
+ * @param data.mimeType - MIME type of the image.
+ * @param data.extension - File extension (e.g., 'jpg', 'png').
+ * @param data.sizeBytes - File size in bytes.
+ * @param data.storageKey - Storage key/path in MinIO.
+ * @param data.userId - The ID of the user whose avatar to update.
+ * @returns A success response containing the updated user object.
+ * @throws Returns error if user lacks 'update_avatar:user' permission or bucket not found.
+ * @example
+ * const { data } = await updateMemberAvatar({
+ *   originalName: 'avatar.jpg',
+ *   extension: 'jpg',
+ *   sizeBytes: 50000,
+ *   storageKey: 'avatars/user_456.jpg',
+ *   userId: 'user_456'
+ * })
+ */
 export const updateMemberAvatar = createServerFn({ method: 'POST' })
   .middleware([authMiddlewareWithOrganization])
   .inputValidator(
@@ -228,32 +332,32 @@ export const updateMemberAvatar = createServerFn({ method: 'POST' })
       userId: string
     }) => data,
   )
-  .handler(async ({ data, context }) => {
-    const hasPermission = await checkPermissionService({
-      subjectResourceId: context.session.session.organizationId,
-      targetResourceId: data.userId,
-      permission: 'update_avatar:user',
-      prisma: context.prisma,
-    })
-    if (!hasPermission)
-      return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'update_avatar:user',
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.session.organizationId,
+        targetResourceId: data.userId,
+        permission: 'update_avatar:user',
+        prisma: tx,
       })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          message: 'Permission required - update_avatar:user',
+        })
 
-    const bucket = await context.prisma.organization.findUnique({
-      where: {
-        id: context.session.session.organizationId,
-      },
-      select: {
-        storageBucketId: true,
-      },
-    })
-    if (!bucket || !bucket.storageBucketId)
-      return serverFnErrorResponse('Not Found', {
-        message: 'Bucket not available',
+      const bucket = await tx.organization.findUnique({
+        where: {
+          id: context.session.session.organizationId,
+        },
+        select: {
+          storageBucketId: true,
+        },
       })
+      if (!bucket || !bucket.storageBucketId)
+        return serverFnErrorResponse('Not Found', {
+          message: 'Bucket not available',
+        })
 
-    const updated = await context.prisma.$transaction(async (tx) => {
       const file = await createFileResourceService({
         currentUserId: context.session.user.id,
         originalName: data.originalName,
@@ -279,17 +383,31 @@ export const updateMemberAvatar = createServerFn({ method: 'POST' })
         role: 'file_editor',
         prisma: tx,
       })
-      const _updated = await updateUserAvatarService({
+      const updated = await updateUserAvatarService({
         userId: data.userId,
         imageFileId: file.id,
         prisma: tx,
       })
-      return _updated
-    })
 
-    return serverFnSuccessResponse('Created', updated)
-  })
+      return serverFnSuccessResponse('Created', updated)
+    }),
+  )
 
+/**
+ * Grants a role to a member within the current organization.
+ * Requires authentication via authMiddlewareWithOrganization.
+ *
+ * @param data.role - The role to grant (e.g., 'org_member', 'org_admin').
+ * @param data.userId - The ID of the user to grant the role to.
+ * @param data.expiresAt - Optional expiration date for the role.
+ * @returns A success response containing the granted role.
+ * @throws Returns error if user lacks 'assign_role:user' permission.
+ * @example
+ * const { data } = await grantRoleToMember({
+ *   role: 'org_admin',
+ *   userId: 'user_456'
+ * })
+ */
 export const grantRoleToMember = createServerFn({ method: 'POST' })
   .middleware([authMiddlewareWithOrganization])
   .inputValidator(
@@ -299,30 +417,41 @@ export const grantRoleToMember = createServerFn({ method: 'POST' })
       expiresAt?: Date | null
     }) => data,
   )
-  .handler(async ({ data, context }) => {
-    const hasPermission = await checkPermissionService({
-      subjectResourceId: context.session.user.id,
-      targetResourceId: context.session.session.organizationId,
-      permission: 'assign_role:user',
-      prisma: context.prisma,
-    })
-    if (!hasPermission)
-      return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'assign_role:user',
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: context.session.session.organizationId,
+        permission: 'assign_role:user',
+        prisma: tx,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          message: 'Permission required - assign_role:user',
+        })
+
+      const role = await grantRoleService({
+        currentUserId: context.session.user.id,
+        subjectResourceId: data.userId,
+        targetResourceId: context.session.session.organizationId,
+        role: data.role,
+        expiresAt: data.expiresAt,
+        prisma: tx,
       })
 
-    const role = await grantRoleService({
-      currentUserId: context.session.user.id,
-      subjectResourceId: data.userId,
-      targetResourceId: context.session.session.organizationId,
-      role: data.role,
-      expiresAt: data.expiresAt,
-      prisma: context.prisma,
-    })
+      return serverFnSuccessResponse('Success', role)
+    }),
+  )
 
-    return serverFnSuccessResponse('Success', role)
-  })
-
+/**
+ * Retrieves all public organizations (visibility = 'public').
+ * Requires dbMiddleware (no auth required).
+ *
+ * @returns A success response containing an array of public organizations.
+ * @example
+ * const { data } = await getPublicOrganizations()
+ * data.organizations.forEach(org => console.log(org.name))
+ */
 export const getPublicOrganizations = createServerFn({ method: 'GET' })
   .middleware([dbMiddleware])
   .handler(async ({ context }) =>
@@ -331,6 +460,15 @@ export const getPublicOrganizations = createServerFn({ method: 'GET' })
     }),
   )
 
+/**
+ * Retrieves all organizations the current user is a member of.
+ * Requires authentication via authMiddleware.
+ *
+ * @returns A success response containing an array of the user's organizations.
+ * @example
+ * const { data } = await getSelfOrganizations()
+ * data.organizations.forEach(org => console.log(org.name))
+ */
 export const getSelfOrganizations = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) =>

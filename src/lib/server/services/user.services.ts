@@ -42,6 +42,19 @@ export async function createUserResourceService({
   })
 }
 
+export async function deleteUserResourceService({
+  id,
+  prisma,
+}: {
+  id: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return await prisma.$transaction(async (tx) => {
+    await tx.user.delete({ where: { id } })
+    return await tx.resource.delete({ where: { id }, select: { id: true } })
+  })
+}
+
 export async function updateUsernameService({
   userId,
   newUsername,

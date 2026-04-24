@@ -105,6 +105,9 @@ export async function addMemberToOrganizationService({
       userId,
       organizationId,
     },
+    select: {
+      id: true,
+    },
   })
 }
 
@@ -129,6 +132,9 @@ export async function updateUserMembershipStatusService({
     data: {
       status,
       joinedAt: status === 'active' ? new Date() : undefined,
+    },
+    select: {
+      id: true,
     },
   })
 }

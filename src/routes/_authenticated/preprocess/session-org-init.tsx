@@ -11,7 +11,7 @@ import {
 } from '#/components/ui/tooltip'
 import { authClient } from '#/lib/auth-client'
 import { useIsMobile } from '#/lib/client/hooks/use-mobile'
-import { updateSessionOrganization } from '#/lib/server/functions/auth.functions'
+import { loginToOrganization } from '#/lib/server/functions/auth.functions'
 import { getSelfOrganizations } from '#/lib/server/functions/organization.functions'
 import { checkPermissions } from '#/lib/server/functions/permission.functions'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
@@ -38,7 +38,7 @@ export const Route = createFileRoute(
     if (!canJoinOrganization) {
       const selfOrganizations = await getSelfOrganizations()
       if (selfOrganizations.length === 1) {
-        await updateSessionOrganization({
+        await loginToOrganization({
           data: { organizationId: selfOrganizations[0].organization.id },
         })
         throw redirect({ to: '/dashboard' })

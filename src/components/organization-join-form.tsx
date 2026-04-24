@@ -1,9 +1,25 @@
 import { publicOrganizationCollection } from '#/lib/client/collections/public-organizations'
+import { selfMembershipCollection } from '#/lib/client/collections/self-memberships'
 import { selfOrganizationCollection } from '#/lib/client/collections/self-organization'
 import { useFilePrefetchLinkQueryOptions } from '#/lib/client/hooks/use-file-prefetch-link-query-options'
-import { and, eq, inArray, not, useLiveQuery } from '@tanstack/react-db'
+import type { UserOrgStatus } from '#/lib/server/db/generated/enums'
+import {
+  eq,
+  isNull,
+  isUndefined,
+  not,
+  or,
+  useLiveQuery,
+} from '@tanstack/react-db'
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, ArrowRight, CircleDashed, Plus } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  CircleDashed,
+  Plus,
+  XCircle,
+} from 'lucide-react'
 import { Fragment } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Button } from './ui/button'
@@ -24,6 +40,12 @@ export default function OrganizationJoinForm({
   } = useLiveQuery((q) =>
     q
       .from({ organization: selfOrganizationCollection })
+      .innerJoin(
+        { membership: selfMembershipCollection },
+        ({ organization, membership }) =>
+          eq(organization.id, membership.organizationId),
+      )
+      .where(({ membership }) => not(eq(membership.status, 'left')))
       .orderBy(({ organization }) => organization.updatedAt, 'desc'),
   )
 
@@ -31,23 +53,20 @@ export default function OrganizationJoinForm({
     data: publicOrganizations,
     isLoading: publicOrganizationsLoading,
     isError: publicOrganizationsError,
-  } = useLiveQuery(
-    (q) =>
-      q
-        .from({ organization: publicOrganizationCollection })
-        .where(({ organization }) =>
-          and(
-            not(
-              inArray(
-                organization.id,
-                selfOrganizations.map((s) => s.id),
-              ),
-            ),
-            eq(organization.$synced, true),
-          ),
-        )
-        .orderBy(({ organization }) => organization.name, 'asc'),
-    [selfOrganizations],
+  } = useLiveQuery((q) =>
+    q
+      .from({ po: publicOrganizationCollection })
+      .leftJoin({ so: selfOrganizationCollection }, ({ po, so }) =>
+        eq(po.id, so.id),
+      )
+      .leftJoin({ m: selfMembershipCollection }, ({ so, m }) =>
+        eq(so.id, m.organizationId),
+      )
+      .where(({ so, m }) =>
+        or(or(isNull(so.id), isUndefined(so.id)), eq(m.status, 'left')),
+      )
+      .select(({ po }) => po)
+      .orderBy(({ po }) => po.name, 'asc'),
   )
 
   return (
@@ -82,13 +101,14 @@ export default function OrganizationJoinForm({
                 <h1 className="font-medium">Joined Organizations</h1>
                 <ScrollArea className="h-64">
                   {selfOrganizations.map((org) => (
-                    <Fragment key={org.id}>
+                    <Fragment key={org.organization.id}>
                       <OrganizationLoginButton
-                        id={org.id}
-                        identifier={org.identifier}
-                        name={org.name}
-                        imageFileId={org.imageFileId}
-                        synced={org.$synced}
+                        id={org.organization.id}
+                        identifier={org.organization.identifier}
+                        name={org.organization.name}
+                        imageFileId={org.organization.imageFileId}
+                        status={org.membership.status}
+                        synced={org.organization.$synced}
                       />
                       <Separator />
                     </Fragment>
@@ -152,12 +172,14 @@ function OrganizationLoginButton({
   name,
   identifier,
   imageFileId,
+  status,
   synced,
 }: {
   id: string
   name: string
   identifier: string
   imageFileId?: string | undefined
+  status: UserOrgStatus
   synced: boolean
 }) {
   const { data: avatarUrl, isFetching: avatarFetching } = useQuery(
@@ -170,14 +192,14 @@ function OrganizationLoginButton({
     <Button
       variant="ghost"
       className="w-full min-h-12 h-auto rounded-none justify-start gap-6"
-      disabled={!synced}
+      disabled={!synced || status === 'requested' || status === 'suspended'}
     >
       <Avatar>
         {avatarFetching ? (
           <Spinner className="size-full stroke-1" />
         ) : (
           <>
-            <AvatarImage src={avatarUrl.url} alt={name} />
+            <AvatarImage src={avatarUrl?.url} alt={name} />
             <AvatarFallback>
               {name
                 .split(' ')
@@ -194,10 +216,30 @@ function OrganizationLoginButton({
         <p className="opacity-20 text-sm font-light">{identifier}</p>
       </span>
 
-      <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
-        <p className="text-xs font-light">Login</p>
-        <ArrowRight />
-      </span>
+      {status === 'active' && (
+        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+          <p className="text-xs font-light">Login</p>
+          <ArrowRight />
+        </span>
+      )}
+      {status === 'invited' && (
+        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+          <p className="text-xs font-light">Accept Invite</p>
+          <CheckCircle2 />
+        </span>
+      )}
+      {status === 'requested' && (
+        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+          <p className="text-xs font-light">Pending Request</p>
+          <Spinner />
+        </span>
+      )}
+      {status === 'suspended' && (
+        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+          <p className="text-xs font-light">Suspended</p>
+          <XCircle />
+        </span>
+      )}
     </Button>
   )
 }
@@ -233,7 +275,7 @@ function OrganizationJoinButton({
           <Spinner className="size-full stroke-1" />
         ) : (
           <>
-            <AvatarImage src={avatarUrl.url} alt={name} />
+            <AvatarImage src={avatarUrl?.url} alt={name} />
             <AvatarFallback>
               {name
                 .split(' ')

@@ -2,7 +2,7 @@ import { organizationSchema } from '#/lib/types/collection-schemas/organization'
 import { getElectricUrl } from '#/lib/utils/electric'
 import { snakeCamelMapper } from '@electric-sql/client'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
-import { createCollection } from '@tanstack/react-db'
+import { BasicIndex, createCollection } from '@tanstack/react-db'
 
 export const publicOrganizationCollection = createCollection(
   electricCollectionOptions({
@@ -13,5 +13,7 @@ export const publicOrganizationCollection = createCollection(
     },
     schema: organizationSchema,
     getKey: (item) => item.id,
+    autoIndex: 'eager',
+    defaultIndexType: BasicIndex,
   }),
 )

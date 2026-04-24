@@ -13,7 +13,11 @@ import { organizationSchema } from '#/lib/types/collection-schemas/organization'
 import { getElectricUrl } from '#/lib/utils/electric'
 import { snakeCamelMapper } from '@electric-sql/client'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
-import { createCollection, createOptimisticAction } from '@tanstack/react-db'
+import {
+  BasicIndex,
+  createCollection,
+  createOptimisticAction,
+} from '@tanstack/react-db'
 import { toast } from 'sonner'
 
 export const selfOrganizationCollection = createCollection(
@@ -25,6 +29,8 @@ export const selfOrganizationCollection = createCollection(
     },
     schema: organizationSchema,
     getKey: (item) => item.id,
+    autoIndex: 'eager',
+    defaultIndexType: BasicIndex,
   }),
 )
 
@@ -55,10 +61,10 @@ export const createOrganizationResourceAction = createOptimisticAction<{
     })
     if (!organizationResource.success) {
       await selfOrganizationCollection.utils.awaitTxId(
-        organizationResource.data?.txid || 0,
+        organizationResource.data.txid,
       )
       toast.error(organizationResource.error, {
-        description: organizationResource.data?.permissionsRequired,
+        description: organizationResource.data.message,
       })
       return
     }
@@ -98,7 +104,7 @@ export const createOrganizationResourceAction = createOptimisticAction<{
 
       const organizationDetails = await getOrganizationDetails({
         data: {
-          id: organizationResource.data.organization.id,
+          organizationId: organizationResource.data.organization.id,
         },
       })
 
@@ -124,9 +130,7 @@ export const createOrganizationResourceAction = createOptimisticAction<{
       })
 
       if (!fileResource.success) {
-        await selfOrganizationCollection.utils.awaitTxId(
-          fileResource.data?.txid || 0,
-        )
+        await selfOrganizationCollection.utils.awaitTxId(fileResource.data.txid)
         toast.error('Image File Not Uploaded')
         return
       }
@@ -139,7 +143,7 @@ export const createOrganizationResourceAction = createOptimisticAction<{
       })
 
       await selfOrganizationCollection.utils.awaitTxId(
-        updatedOrganizationResource.data?.txid || 0,
+        updatedOrganizationResource.data.txid,
       )
       toast.success('Organization Created')
     } else {
@@ -173,7 +177,7 @@ export const updateOrganizationResourceAction = createOptimisticAction<{
       const fileext = imageFile.name.slice(lastDot + 1)
 
       const organizationDetails = await getOrganizationDetails({
-        data: { id },
+        data: { organizationId: id },
       })
       if (!organizationDetails.success) {
         selfOrganizationCollection.startSyncImmediate()
@@ -221,9 +225,7 @@ export const updateOrganizationResourceAction = createOptimisticAction<{
       if (fileResource.success) {
         imageFileId = fileResource.data.file.id
       } else {
-        await selfOrganizationCollection.utils.awaitTxId(
-          fileResource.data?.txid || 0,
-        )
+        await selfOrganizationCollection.utils.awaitTxId(fileResource.data.txid)
         toast.error('Image File Not Uploaded')
         return
       }
@@ -245,10 +247,10 @@ export const updateOrganizationResourceAction = createOptimisticAction<{
       toast.success('Organization Updated')
     } else {
       await selfOrganizationCollection.utils.awaitTxId(
-        organizationResource.data?.txid || 0,
+        organizationResource.data.txid,
       )
       toast.error(organizationResource.error, {
-        description: organizationResource.data?.permissionsRequired,
+        description: organizationResource.data.message,
       })
     }
   },
@@ -272,10 +274,10 @@ export const deleteOrganizationResourceAction = createOptimisticAction<{
       toast.success('Organization Deleted')
     } else {
       await selfOrganizationCollection.utils.awaitTxId(
-        deletedOrganization.data?.txid || 0,
+        deletedOrganization.data.txid,
       )
       toast.error(deletedOrganization.error, {
-        description: deletedOrganization.data?.permissionsRequired,
+        description: deletedOrganization.data.message,
       })
     }
   },

@@ -26,6 +26,5 @@ export const useFilePrefetchLinkQueryOptions = ({
       if (!_avatarUrl.success) return defaultReturn
       return _avatarUrl.data
     },
-    initialData: defaultReturn,
     staleTime,
   })

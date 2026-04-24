@@ -126,3 +126,64 @@ export async function grantRoleService({
 
   return res
 }
+
+export async function revokeRoleService({
+  subjectResourceId,
+  targetResourceId,
+  role,
+  currentUserId,
+  prisma,
+}: {
+  subjectResourceId: string
+  targetResourceId: string
+  role: Role | (string & {})
+  currentUserId: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  const foundRole = await prisma.role.findUnique({
+    where: {
+      name: role,
+    },
+    select: { id: true },
+  })
+  if (!foundRole) throw new Error('Not Found')
+
+  return prisma.resourceRoleAssignment.update({
+    where: {
+      subjectResourceId_targetResourceId_roleId: {
+        subjectResourceId,
+        targetResourceId,
+        roleId: foundRole.id,
+      },
+    },
+    data: {
+      isActive: false,
+      grantedById: currentUserId,
+      expiresAt: null,
+    },
+  })
+}
+
+export async function revokeAllRolesService({
+  subjectResourceId,
+  targetResourceId,
+  currentUserId,
+  prisma,
+}: {
+  subjectResourceId: string
+  targetResourceId: string
+  currentUserId: string
+  prisma: PrismaClient | PrismaTransaction
+}) {
+  return prisma.resourceRoleAssignment.updateMany({
+    where: {
+      subjectResourceId,
+      targetResourceId,
+    },
+    data: {
+      isActive: false,
+      grantedById: currentUserId,
+      expiresAt: null,
+    },
+  })
+}

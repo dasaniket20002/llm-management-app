@@ -25,6 +25,7 @@ import { Route as UnprotectedApiAuthSplatRouteImport } from './routes/_unprotect
 import { Route as OrganizationalApiElectricSelfResourceRolesRouteImport } from './routes/_organizational/api/electric/self-resource-roles'
 import { Route as OrganizationalApiElectricSelfOrganizationMembersRouteImport } from './routes/_organizational/api/electric/self-organization-members'
 import { Route as AuthenticatedApiElectricSelfOrganizationsRouteImport } from './routes/_authenticated/api/electric/self-organizations'
+import { Route as AuthenticatedApiElectricSelfOrganizationMembershipsRouteImport } from './routes/_authenticated/api/electric/self-organization-memberships'
 
 const UnprotectedRoute = UnprotectedRouteImport.update({
   id: '/_unprotected',
@@ -110,6 +111,12 @@ const AuthenticatedApiElectricSelfOrganizationsRoute =
     path: '/api/electric/self-organizations',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedApiElectricSelfOrganizationMembershipsRoute =
+  AuthenticatedApiElectricSelfOrganizationMembershipsRouteImport.update({
+    id: '/api/electric/self-organization-memberships',
+    path: '/api/electric/self-organization-memberships',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof UnprotectedSignUpRoute
   '/preprocess/account-setup': typeof AuthenticatedPreprocessAccountSetupRoute
   '/preprocess/session-org-init': typeof AuthenticatedPreprocessSessionOrgInitRoute
+  '/api/electric/self-organization-memberships': typeof AuthenticatedApiElectricSelfOrganizationMembershipsRoute
   '/api/electric/self-organizations': typeof AuthenticatedApiElectricSelfOrganizationsRoute
   '/api/electric/self-organization-members': typeof OrganizationalApiElectricSelfOrganizationMembersRoute
   '/api/electric/self-resource-roles': typeof OrganizationalApiElectricSelfResourceRolesRoute
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof UnprotectedSignUpRoute
   '/preprocess/account-setup': typeof AuthenticatedPreprocessAccountSetupRoute
   '/preprocess/session-org-init': typeof AuthenticatedPreprocessSessionOrgInitRoute
+  '/api/electric/self-organization-memberships': typeof AuthenticatedApiElectricSelfOrganizationMembershipsRoute
   '/api/electric/self-organizations': typeof AuthenticatedApiElectricSelfOrganizationsRoute
   '/api/electric/self-organization-members': typeof OrganizationalApiElectricSelfOrganizationMembersRoute
   '/api/electric/self-resource-roles': typeof OrganizationalApiElectricSelfResourceRolesRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/_unprotected/sign-up': typeof UnprotectedSignUpRoute
   '/_authenticated/preprocess/account-setup': typeof AuthenticatedPreprocessAccountSetupRoute
   '/_authenticated/preprocess/session-org-init': typeof AuthenticatedPreprocessSessionOrgInitRoute
+  '/_authenticated/api/electric/self-organization-memberships': typeof AuthenticatedApiElectricSelfOrganizationMembershipsRoute
   '/_authenticated/api/electric/self-organizations': typeof AuthenticatedApiElectricSelfOrganizationsRoute
   '/_organizational/api/electric/self-organization-members': typeof OrganizationalApiElectricSelfOrganizationMembersRoute
   '/_organizational/api/electric/self-resource-roles': typeof OrganizationalApiElectricSelfResourceRolesRoute
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
+    | '/api/electric/self-organization-memberships'
     | '/api/electric/self-organizations'
     | '/api/electric/self-organization-members'
     | '/api/electric/self-resource-roles'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/preprocess/account-setup'
     | '/preprocess/session-org-init'
+    | '/api/electric/self-organization-memberships'
     | '/api/electric/self-organizations'
     | '/api/electric/self-organization-members'
     | '/api/electric/self-resource-roles'
@@ -203,6 +215,7 @@ export interface FileRouteTypes {
     | '/_unprotected/sign-up'
     | '/_authenticated/preprocess/account-setup'
     | '/_authenticated/preprocess/session-org-init'
+    | '/_authenticated/api/electric/self-organization-memberships'
     | '/_authenticated/api/electric/self-organizations'
     | '/_organizational/api/electric/self-organization-members'
     | '/_organizational/api/electric/self-resource-roles'
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedApiElectricSelfOrganizationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/api/electric/self-organization-memberships': {
+      id: '/_authenticated/api/electric/self-organization-memberships'
+      path: '/api/electric/self-organization-memberships'
+      fullPath: '/api/electric/self-organization-memberships'
+      preLoaderRoute: typeof AuthenticatedApiElectricSelfOrganizationMembershipsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -339,6 +359,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMainRoute: typeof AuthenticatedMainRoute
   AuthenticatedPreprocessAccountSetupRoute: typeof AuthenticatedPreprocessAccountSetupRoute
   AuthenticatedPreprocessSessionOrgInitRoute: typeof AuthenticatedPreprocessSessionOrgInitRoute
+  AuthenticatedApiElectricSelfOrganizationMembershipsRoute: typeof AuthenticatedApiElectricSelfOrganizationMembershipsRoute
   AuthenticatedApiElectricSelfOrganizationsRoute: typeof AuthenticatedApiElectricSelfOrganizationsRoute
 }
 
@@ -348,6 +369,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedPreprocessAccountSetupRoute,
   AuthenticatedPreprocessSessionOrgInitRoute:
     AuthenticatedPreprocessSessionOrgInitRoute,
+  AuthenticatedApiElectricSelfOrganizationMembershipsRoute:
+    AuthenticatedApiElectricSelfOrganizationMembershipsRoute,
   AuthenticatedApiElectricSelfOrganizationsRoute:
     AuthenticatedApiElectricSelfOrganizationsRoute,
 }

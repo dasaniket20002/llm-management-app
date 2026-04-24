@@ -6,6 +6,7 @@ import {
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { generateTxId } from '../db/db'
+import type { Visibility } from '../db/generated/enums'
 import { createFileResourceService } from '../services/file.services'
 import {
   checkPermissionService,
@@ -13,6 +14,7 @@ import {
 } from '../services/permission.services'
 import {
   createUserResourceService,
+  deleteUserResourceService,
   updateUserAvatarService,
   updateUserBucketService,
   updateUsernameService,
@@ -21,8 +23,26 @@ import {
   authMiddleware,
   authMiddlewareWithOrganization,
 } from './auth.functions'
-import type { Visibility } from '../db/generated/enums'
 
+/**
+ * Creates a new user resource within the current organization and grants ownership roles.
+ * Requires authentication via authMiddlewareWithOrganization.
+ *
+ * @param data.name - Display name of the user.
+ * @param data.email - Email address of the user.
+ * @param data.emailVerified - Optional flag indicating if email is verified.
+ * @param data.imageFileId - Optional profile image file ID.
+ * @param data.username - Unique username for the user.
+ * @param data.visibility - Optional visibility setting (public/private).
+ * @returns A success response containing the created user and transaction ID.
+ * @throws Returns error if user lacks 'create:user' permission.
+ * @example
+ * const { data } = await createUserResource({
+ *   name: 'John Doe',
+ *   email: 'john@example.com',
+ *   username: 'john_doe'
+ * })
+ */
 export const createUserResource = createServerFn({ method: 'POST' })
   .middleware([authMiddlewareWithOrganization])
   .inputValidator(
@@ -47,7 +67,7 @@ export const createUserResource = createServerFn({ method: 'POST' })
       })
       if (!hasPermission)
         return serverFnErrorResponse('Unauthorized', {
-          permissionsRequired: 'create:user',
+          message: 'Permission required - create:user',
           txid,
         })
 
@@ -77,6 +97,43 @@ export const createUserResource = createServerFn({ method: 'POST' })
     }),
   )
 
+export const deleteUserResource = createServerFn({ method: 'POST' })
+  .middleware([authMiddlewareWithOrganization])
+  .inputValidator((data: { userId: string }) => data)
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const txid = await generateTxId(tx)
+
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.session.organizationId,
+        targetResourceId: data.userId,
+        permission: 'delete:user',
+        prisma: tx,
+      })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          message: 'Permission required - delete:user',
+          txid,
+        })
+
+      const user = await deleteUserResourceService({
+        id: data.userId,
+        prisma: tx,
+      })
+
+      return serverFnSuccessResponse('Deleted', { user, txid })
+    }),
+  )
+
+/**
+ * Checks if the current user has a password set on their account.
+ * Requires authentication via authMiddleware.
+ *
+ * @returns A success response containing { data: boolean } - true if password is set.
+ * @example
+ * const { data } = await isPasswordSet()
+ * if (data) { console.log('User has a password') }
+ */
 export const isPasswordSet = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
@@ -89,6 +146,15 @@ export const isPasswordSet = createServerFn({ method: 'GET' })
     return serverFnSuccessResponse(ps ? 'Password Set' : 'Password Unset', ps)
   })
 
+/**
+ * Checks if the current user has any passkeys registered.
+ * Requires authentication via authMiddleware.
+ *
+ * @returns A success response containing { data: boolean } - true if passkeys exist.
+ * @example
+ * const { data } = await isPasskeySet()
+ * if (data) { console.log('User has passkeys') }
+ */
 export const isPasskeySet = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
@@ -101,6 +167,15 @@ export const isPasskeySet = createServerFn({ method: 'GET' })
     return serverFnSuccessResponse(ps ? 'Passkey Set' : 'Passkey Unset', ps)
   })
 
+/**
+ * Checks if the current user has a username set.
+ * Requires authentication via authMiddleware.
+ *
+ * @returns A success response containing { data: string | null } - the username or null.
+ * @example
+ * const { data } = await isUsernameSet()
+ * if (data) { console.log(`Username: ${data}`) }
+ */
 export const isUsernameSet = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
@@ -114,6 +189,16 @@ export const isUsernameSet = createServerFn({ method: 'GET' })
     )
   })
 
+/**
+ * Updates the current user's password.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.newPassword - The new password to set.
+ * @returns A success response on success.
+ * @throws Returns error if user lacks 'update_password:user' permission.
+ * @example
+ * const { data } = await updatePassword({ newPassword: 'newPass123!' })
+ */
 export const updatePassword = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { newPassword: string }) => data)
@@ -126,7 +211,7 @@ export const updatePassword = createServerFn({ method: 'POST' })
     })
     if (!hasPermission)
       return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'user:update:password',
+        message: 'Permission required - update_password:user',
       })
 
     const headers = getRequestHeaders()
@@ -137,10 +222,23 @@ export const updatePassword = createServerFn({ method: 'POST' })
       headers: headers,
     })
 
-    if (!res.status) return serverFnErrorResponse('Internal Error', null)
+    if (!res.status)
+      return serverFnErrorResponse('Internal Error', {
+        message: `An Internal Error has occured`,
+      })
     return serverFnSuccessResponse('Success', null)
   })
 
+/**
+ * Updates the current user's username.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.newUsername - The new username to set.
+ * @returns A success response containing the updated user object.
+ * @throws Returns error if user lacks 'update_username:user' permission.
+ * @example
+ * const { data } = await updateUsername({ newUsername: 'new_username' })
+ */
 export const updateUsername = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { newUsername: string }) => data)
@@ -153,7 +251,7 @@ export const updateUsername = createServerFn({ method: 'POST' })
     })
     if (!hasPermission)
       return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'update_username:user',
+        message: 'Permission required - update_username:user',
       })
 
     const updated = await updateUsernameService({
@@ -162,10 +260,19 @@ export const updateUsername = createServerFn({ method: 'POST' })
       prisma: context.prisma,
     })
 
-    if (!updated.id) return serverFnErrorResponse('Not Found', updated)
     return serverFnSuccessResponse('Success', updated)
   })
 
+/**
+ * Updates the current user's storage bucket ID.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.storageBucketId - The ID of the storage bucket to assign.
+ * @returns A success response on success.
+ * @throws Returns error if user lacks 'create_bucket:user' permission.
+ * @example
+ * const { data } = await updateUserBucket({ storageBucketId: 'bucket_123' })
+ */
 export const updateUserBucket = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { storageBucketId: string }) => data)
@@ -178,7 +285,7 @@ export const updateUserBucket = createServerFn({ method: 'POST' })
     })
     if (!hasPermission)
       return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'create_bucket:user',
+        message: 'Permission required - create_bucket:user',
       })
 
     await updateUserBucketService({
@@ -188,6 +295,26 @@ export const updateUserBucket = createServerFn({ method: 'POST' })
     })
   })
 
+/**
+ * Updates the current user's avatar by creating a new file resource and linking it.
+ * Requires authentication via authMiddleware.
+ *
+ * @param data.originalName - Original filename of the avatar image.
+ * @param data.displayName - Optional display name for the image.
+ * @param data.mimeType - MIME type of the image.
+ * @param data.extension - File extension (e.g., 'jpg', 'png').
+ * @param data.sizeBytes - File size in bytes.
+ * @param data.storageKey - Storage key/path in MinIO.
+ * @returns A success response containing the updated user object.
+ * @throws Returns error if user lacks 'update_avatar:user' permission or bucket not found.
+ * @example
+ * const { data } = await updateUserAvatar({
+ *   originalName: 'avatar.jpg',
+ *   extension: 'jpg',
+ *   sizeBytes: 50000,
+ *   storageKey: 'avatars/user.jpg'
+ * })
+ */
 export const updateUserAvatar = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(
@@ -200,28 +327,28 @@ export const updateUserAvatar = createServerFn({ method: 'POST' })
       storageKey: string
     }) => data,
   )
-  .handler(async ({ data, context }) => {
-    const hasSelfPermission = await checkPermissionService({
-      subjectResourceId: context.session.user.id,
-      targetResourceId: context.session.user.id,
-      permission: 'update_avatar:user',
-      prisma: context.prisma,
-    })
-    if (hasSelfPermission)
-      return serverFnErrorResponse('Unauthorized', {
-        permissionsRequired: 'update_avatar:user',
+  .handler(async ({ data, context }) =>
+    context.prisma.$transaction(async (tx) => {
+      const hasPermission = await checkPermissionService({
+        subjectResourceId: context.session.user.id,
+        targetResourceId: context.session.user.id,
+        permission: 'update_avatar:user',
+        prisma: tx,
       })
+      if (!hasPermission)
+        return serverFnErrorResponse('Unauthorized', {
+          message: 'Permission required - update_avatar:user',
+        })
 
-    const bucket = await context.prisma.user.findUnique({
-      where: { id: context.session.user.id },
-      select: { storageBucketId: true },
-    })
-    if (!bucket || !bucket.storageBucketId)
-      return serverFnErrorResponse('Not Found', {
-        message: 'Bucket not available',
+      const bucket = await tx.user.findUnique({
+        where: { id: context.session.user.id },
+        select: { storageBucketId: true },
       })
+      if (!bucket || !bucket.storageBucketId)
+        return serverFnErrorResponse('Not Found', {
+          message: 'Bucket not available',
+        })
 
-    const updated = await context.prisma.$transaction(async (tx) => {
       const file = await createFileResourceService({
         currentUserId: context.session.user.id,
         originalName: data.originalName,
@@ -229,7 +356,7 @@ export const updateUserAvatar = createServerFn({ method: 'POST' })
         extension: data.extension,
         sizeBytes: data.sizeBytes,
         storageKey: data.storageKey,
-        storageBucketId: bucket.storageBucketId!,
+        storageBucketId: bucket.storageBucketId,
         visibility: 'public',
         prisma: tx,
       })
@@ -240,13 +367,12 @@ export const updateUserAvatar = createServerFn({ method: 'POST' })
         role: 'file_owner',
         prisma: tx,
       })
-      const _updated = await updateUserAvatarService({
+      const updated = await updateUserAvatarService({
         userId: context.session.user.id,
         imageFileId: file.id,
         prisma: tx,
       })
-      return _updated
-    })
 
-    return serverFnSuccessResponse('Created', updated)
-  })
+      return serverFnSuccessResponse('Created', updated)
+    }),
+  )

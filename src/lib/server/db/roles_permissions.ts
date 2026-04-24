@@ -68,6 +68,10 @@ export const PERMISSIONS_DEFINATIONS = [
     description: 'Join an organization (via invite/link)',
   },
   {
+    action: 'login:organization',
+    description: 'Login to an organization',
+  },
+  {
     action: 'leave:organization',
     description: 'Leave an organization',
   },
@@ -178,6 +182,7 @@ export const ROLES_DEFINATIONS = [
       'read:organization',
       'update:organization',
       'delete:organization',
+      'login:organization',
 
       'invite:user',
       'create:user',
@@ -207,6 +212,7 @@ export const ROLES_DEFINATIONS = [
     permissions: [
       'read:organization',
       'update:organization',
+      'login:organization',
 
       'invite:user',
       'remove:user',
@@ -235,6 +241,7 @@ export const ROLES_DEFINATIONS = [
       'read:organization',
       'read:user',
       'read_role:organization',
+      'login:organization',
 
       'create:file',
       'read:file',
@@ -246,6 +253,7 @@ export const ROLES_DEFINATIONS = [
     description: 'Read-only access to organization content',
     permissions: [
       'read:organization',
+      'login:organization',
       'read:user',
       'read_role:organization',
       'read:file',
