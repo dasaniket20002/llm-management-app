@@ -1,6 +1,6 @@
 import { publicOrganizationCollection } from '#/lib/client/collections/public-organizations'
 import { selfOrganizationCollection } from '#/lib/client/collections/self-organization'
-import { getPresignedGetUrl } from '#/lib/server/functions/file.functions'
+import { useFilePrefetchLinkQueryOptions } from '#/lib/client/hooks/use-file-prefetch-link-query-options'
 import { and, eq, inArray, not, useLiveQuery } from '@tanstack/react-db'
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, ArrowRight, CircleDashed, Plus } from 'lucide-react'
@@ -160,19 +160,12 @@ function OrganizationLoginButton({
   imageFileId?: string | undefined
   synced: boolean
 }) {
-  const { data: avatarUrl, isFetching: avatarFetching } = useQuery({
-    queryKey: [`org-img-$${id}`],
-    queryFn: async () => {
-      if (!imageFileId) return ''
-      const _avatarUrl = await getPresignedGetUrl({
-        data: { fileId: imageFileId, ownerResourceId: id },
-      })
-      console.log(_avatarUrl)
-      if (!_avatarUrl.success) return ''
-      return _avatarUrl.data.url
-    },
-    initialData: '',
-  })
+  const { data: avatarUrl, isFetching: avatarFetching } = useQuery(
+    useFilePrefetchLinkQueryOptions({
+      fileId: imageFileId ?? '',
+      ownerResourceId: id,
+    }),
+  )
   return (
     <Button
       variant="ghost"
@@ -184,7 +177,7 @@ function OrganizationLoginButton({
           <Spinner className="size-full stroke-1" />
         ) : (
           <>
-            <AvatarImage src={avatarUrl} alt={name} />
+            <AvatarImage src={avatarUrl.url} alt={name} />
             <AvatarFallback>
               {name
                 .split(' ')
@@ -222,18 +215,13 @@ function OrganizationJoinButton({
   imageFileId?: string | undefined
   synced: boolean
 }) {
-  const { data: avatarUrl, isFetching: avatarFetching } = useQuery({
-    queryKey: [`org-img-$${id}`],
-    queryFn: async () => {
-      if (!imageFileId) return ''
-      const _avatarUrl = await getPresignedGetUrl({
-        data: { fileId: imageFileId, ownerResourceId: id },
-      })
-      if (!_avatarUrl.success) return ''
-      return _avatarUrl.data.url
-    },
-    initialData: '',
-  })
+  const { data: avatarUrl, isFetching: avatarFetching } = useQuery(
+    useFilePrefetchLinkQueryOptions({
+      fileId: imageFileId ?? '',
+      ownerResourceId: id,
+    }),
+  )
+
   return (
     <Button
       variant="ghost"
@@ -245,7 +233,7 @@ function OrganizationJoinButton({
           <Spinner className="size-full stroke-1" />
         ) : (
           <>
-            <AvatarImage src={avatarUrl} alt={name} />
+            <AvatarImage src={avatarUrl.url} alt={name} />
             <AvatarFallback>
               {name
                 .split(' ')
