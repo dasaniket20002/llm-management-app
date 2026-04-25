@@ -57,7 +57,8 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const isMobile = useIsMobile()
   const navigate = useNavigate()
-  const { canCreateOrganization, canJoinOrganization } = Route.useRouteContext()
+  const { canCreateOrganization, canJoinOrganization, session } =
+    Route.useRouteContext()
 
   return (
     <div className="min-h-svh place-items-center place-content-center bg-muted p-6 md:p-10">
@@ -98,7 +99,10 @@ function RouteComponent() {
               <Separator orientation={isMobile ? 'horizontal' : 'vertical'} />
             </>
           )}
-          <OrganizationJoinForm canJoinOrganization={canJoinOrganization} />
+          <OrganizationJoinForm
+            canJoinOrganization={canJoinOrganization}
+            currentUserId={session.user.id}
+          />
         </Card>
       </div>
     </div>

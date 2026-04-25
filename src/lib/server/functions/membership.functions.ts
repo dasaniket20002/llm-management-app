@@ -18,6 +18,7 @@ import {
   authMiddleware,
   authMiddlewareWithOrganization,
 } from './auth.functions'
+import { deleteUserResourceService } from '../services/user.services'
 
 /**
  * Requests to join an organization. Creates a membership request with 'requested' status.
@@ -226,12 +227,27 @@ export const removeUser = createServerFn({ method: 'POST' })
         prisma: tx,
       })
 
-      await revokeAllRolesService({
-        currentUserId: context.session.user.id,
-        subjectResourceId: data.userId,
-        targetResourceId: context.session.session.organizationId,
-        prisma: tx,
-      })
+      if (data.status === 'left') {
+        const canDeleteUser = await checkPermissionService({
+          subjectResourceId: context.session.session.organizationId,
+          targetResourceId: data.userId,
+          permission: 'delete:user',
+          prisma: tx,
+        })
+        if (canDeleteUser) {
+          await deleteUserResourceService({
+            id: data.userId,
+            prisma: tx,
+          })
+        }
+      } else {
+        await revokeAllRolesService({
+          currentUserId: context.session.user.id,
+          subjectResourceId: data.userId,
+          targetResourceId: context.session.session.organizationId,
+          prisma: tx,
+        })
+      }
 
       return serverFnSuccessResponse('Success', { membership, txid })
     }),

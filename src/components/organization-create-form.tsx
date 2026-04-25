@@ -191,7 +191,7 @@ export default function OrganizationCreateForm() {
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
-                    {isValid && !createForm.state.isSubmitSuccessful && (
+                    {isValid && (
                       <FieldValid
                         messages={[{ message: 'Identifier available' }]}
                       />

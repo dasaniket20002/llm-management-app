@@ -1,4 +1,8 @@
 import {
+  loginToOrganization,
+  logoutOfOrganization,
+} from '#/lib/server/functions/auth.functions'
+import {
   acceptOrganization,
   acceptUser,
   inviteUser,
@@ -15,6 +19,7 @@ import {
   createCollection,
   createOptimisticAction,
 } from '@tanstack/react-db'
+import type { UseNavigateResult } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
 export const selfMembershipCollection = createCollection(
@@ -32,7 +37,7 @@ export const selfMembershipCollection = createCollection(
 )
 
 export const createMembershipAction = createOptimisticAction<{
-  action: 'join' | 'invite'
+  action: 'request' | 'invite'
   userId: string
   organizationId: string
 }>({
@@ -47,7 +52,7 @@ export const createMembershipAction = createOptimisticAction<{
     })
   },
   mutationFn: async ({ action, userId, organizationId }) => {
-    if (action === 'join') {
+    if (action === 'request') {
       const membership = await requestJoin({
         data: {
           organizationId,
@@ -83,11 +88,19 @@ export const createMembershipAction = createOptimisticAction<{
   },
 })
 
-export const updateMembershipAction = createOptimisticAction<{
-  action: 'acceptUser' | 'acceptOrganization'
-  userId: string
-  organizationId: string
-}>({
+export const updateMembershipAction = createOptimisticAction<
+  | {
+      action: 'acceptUser'
+      userId: string
+      organizationId: string
+    }
+  | {
+      action: 'acceptOrganization'
+      userId: string
+      organizationId: string
+      navigate: UseNavigateResult<string>
+    }
+>({
   onMutate: ({ userId, organizationId }) => {
     const key = selfMembershipCollection.toArray.find(
       (item) =>
@@ -98,11 +111,11 @@ export const updateMembershipAction = createOptimisticAction<{
       item.status = 'active'
     })
   },
-  mutationFn: async ({ action, userId, organizationId }) => {
-    if (action === 'acceptUser') {
+  mutationFn: async (inputData) => {
+    if (inputData.action === 'acceptUser') {
       const membership = await acceptUser({
         data: {
-          userId,
+          userId: inputData.userId,
         },
       })
 
@@ -118,7 +131,7 @@ export const updateMembershipAction = createOptimisticAction<{
     } else {
       const membership = await acceptOrganization({
         data: {
-          organizationId,
+          organizationId: inputData.organizationId,
         },
       })
 
@@ -128,6 +141,12 @@ export const updateMembershipAction = createOptimisticAction<{
         })
       } else {
         toast.success('Joined')
+
+        const login = await loginToOrganization({
+          data: { organizationId: inputData.organizationId },
+        })
+        if (login.success) inputData.navigate({ to: '/dashboard' })
+        else toast.error(login.error, { description: login.data.message })
       }
 
       await selfMembershipCollection.utils.awaitTxId(membership.data.txid)
@@ -135,11 +154,19 @@ export const updateMembershipAction = createOptimisticAction<{
   },
 })
 
-export const deleteMembershipAction = createOptimisticAction<{
-  action: 'leave' | 'suspend' | 'remove'
-  userId: string
-  organizationId: string
-}>({
+export const deleteMembershipAction = createOptimisticAction<
+  | {
+      action: 'suspend' | 'remove'
+      userId: string
+      organizationId: string
+    }
+  | {
+      action: 'leave'
+      userId: string
+      organizationId: string
+      navigate: UseNavigateResult<string>
+    }
+>({
   onMutate: ({ userId, organizationId }) => {
     const key = selfMembershipCollection.toArray.find(
       (item) =>
@@ -148,8 +175,8 @@ export const deleteMembershipAction = createOptimisticAction<{
 
     if (key) selfMembershipCollection.delete(key)
   },
-  mutationFn: async ({ action, userId }) => {
-    if (action === 'leave') {
+  mutationFn: async (inputData) => {
+    if (inputData.action === 'leave') {
       const membership = await leaveOrganization()
 
       if (!membership.success) {
@@ -158,14 +185,18 @@ export const deleteMembershipAction = createOptimisticAction<{
         })
       } else {
         toast.success('Removed')
+
+        const logout = await logoutOfOrganization()
+        if (logout.success) inputData.navigate({ to: '/sign-in' })
+        else toast.error(logout.error, { description: logout.data.message })
       }
 
       await selfMembershipCollection.utils.awaitTxId(membership.data.txid)
     } else {
       const membership = await removeUser({
         data: {
-          userId,
-          status: action === 'remove' ? 'left' : 'suspended',
+          userId: inputData.userId,
+          status: inputData.action === 'remove' ? 'left' : 'suspended',
         },
       })
 

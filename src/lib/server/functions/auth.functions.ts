@@ -115,7 +115,7 @@ export const ensureSession = createServerFn({ method: 'GET' }).handler(
  */
 export const loginToOrganization = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { organizationId: string | null | undefined }) => data)
+  .inputValidator((data: { organizationId: string }) => data)
   .handler(async ({ data, context }) => {
     if (data.organizationId) {
       const hasPermission = await checkPermissionService({
@@ -134,6 +134,30 @@ export const loginToOrganization = createServerFn({ method: 'POST' })
 
     const session = await auth.api.updateSession({
       body: { organizationId: data.organizationId },
+      headers,
+    })
+
+    return serverFnSuccessResponse('Found', session)
+  })
+
+export const logoutOfOrganization = createServerFn({ method: 'GET' })
+  .middleware([authMiddlewareWithOrganization])
+  .handler(async ({ context }) => {
+    const hasPermission = await checkPermissionService({
+      subjectResourceId: context.session.user.id,
+      targetResourceId: context.session.session.organizationId,
+      permission: 'login:organization',
+      prisma: context.prisma,
+    })
+    if (!hasPermission)
+      return serverFnErrorResponse('Unauthorized', {
+        message: 'Permission required - login:organization',
+      })
+
+    const headers = getRequestHeaders()
+
+    const session = await auth.api.updateSession({
+      body: { organizationId: undefined },
       headers,
     })
 

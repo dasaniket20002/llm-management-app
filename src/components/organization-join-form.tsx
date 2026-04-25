@@ -1,8 +1,13 @@
 import { publicOrganizationCollection } from '#/lib/client/collections/public-organizations'
-import { selfMembershipCollection } from '#/lib/client/collections/self-memberships'
+import {
+  createMembershipAction,
+  selfMembershipCollection,
+  updateMembershipAction,
+} from '#/lib/client/collections/self-memberships'
 import { selfOrganizationCollection } from '#/lib/client/collections/self-organization'
 import { useFilePrefetchLinkQueryOptions } from '#/lib/client/hooks/use-file-prefetch-link-query-options'
 import type { UserOrgStatus } from '#/lib/server/db/generated/enums'
+import { loginToOrganization } from '#/lib/server/functions/auth.functions'
 import {
   eq,
   isNull,
@@ -12,6 +17,7 @@ import {
   useLiveQuery,
 } from '@tanstack/react-db'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   ArrowRight,
@@ -20,7 +26,8 @@ import {
   Plus,
   XCircle,
 } from 'lucide-react'
-import { Fragment } from 'react'
+import { Fragment, useCallback } from 'react'
+import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Button } from './ui/button'
 import { CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
@@ -30,8 +37,10 @@ import { Spinner } from './ui/spinner'
 
 export default function OrganizationJoinForm({
   canJoinOrganization,
+  currentUserId,
 }: {
   canJoinOrganization: boolean
+  currentUserId: string
 }) {
   const {
     data: selfOrganizations,
@@ -109,6 +118,7 @@ export default function OrganizationJoinForm({
                         imageFileId={org.organization.imageFileId}
                         status={org.membership.status}
                         synced={org.organization.$synced}
+                        currentUserId={currentUserId}
                       />
                       <Separator />
                     </Fragment>
@@ -151,6 +161,7 @@ export default function OrganizationJoinForm({
                             identifier={org.identifier}
                             name={org.name}
                             imageFileId={org.imageFileId}
+                            currentUserId={currentUserId}
                             synced={org.$synced}
                           />
                           <Separator />
@@ -174,6 +185,7 @@ function OrganizationLoginButton({
   imageFileId,
   status,
   synced,
+  currentUserId,
 }: {
   id: string
   name: string
@@ -181,18 +193,48 @@ function OrganizationLoginButton({
   imageFileId?: string | undefined
   status: UserOrgStatus
   synced: boolean
+  currentUserId: string
 }) {
+  const navigate = useNavigate()
+
   const { data: avatarUrl, isFetching: avatarFetching } = useQuery(
     useFilePrefetchLinkQueryOptions({
       fileId: imageFileId ?? '',
       ownerResourceId: id,
     }),
   )
+
+  const onClick = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault()
+      if (status === 'active') {
+        const login = await loginToOrganization({
+          data: { organizationId: id },
+        })
+        if (login.success) navigate({ to: '/dashboard' })
+        else toast.error(login.error, { description: login.data.message })
+      } else if (status === 'invited') {
+        updateMembershipAction({
+          action: 'acceptOrganization',
+          organizationId: id,
+          userId: currentUserId,
+          navigate,
+        })
+      } else if (status === 'requested') {
+        toast.error('Waiting for Admin to accept')
+      } else if (status === 'suspended') {
+        toast.error('You have been temporarily suspended')
+      }
+    },
+    [status, navigate, currentUserId, id],
+  )
+
   return (
     <Button
       variant="ghost"
-      className="w-full min-h-12 h-auto rounded-none justify-start gap-6"
-      disabled={!synced || status === 'requested' || status === 'suspended'}
+      className="w-full min-h-12 h-auto rounded-none grid grid-cols-[3rem_2fr_1fr_2fr]"
+      disabled={!synced}
+      onClick={onClick}
     >
       <Avatar>
         {avatarFetching ? (
@@ -211,31 +253,31 @@ function OrganizationLoginButton({
         )}
       </Avatar>
 
-      <span className="w-full flex-1 py-1 text-start grid grid-cols-2 gap-3 items-end">
-        <h1 className="text-base font-light">{name}</h1>
-        <p className="opacity-20 text-sm font-light">{identifier}</p>
-      </span>
+      <h1 className="text-base font-light text-start text-ellipsis">{name}</h1>
+      <p className="opacity-20 text-sm font-light text-start text-ellipsis">
+        {identifier}
+      </p>
 
       {status === 'active' && (
-        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+        <span className="place-self-end self-center flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
           <p className="text-xs font-light">Login</p>
           <ArrowRight />
         </span>
       )}
       {status === 'invited' && (
-        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+        <span className="place-self-end self-center flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
           <p className="text-xs font-light">Accept Invite</p>
           <CheckCircle2 />
         </span>
       )}
       {status === 'requested' && (
-        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+        <span className="place-self-end self-center flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
           <p className="text-xs font-light">Pending Request</p>
           <Spinner />
         </span>
       )}
       {status === 'suspended' && (
-        <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+        <span className="place-self-end self-center flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
           <p className="text-xs font-light">Suspended</p>
           <XCircle />
         </span>
@@ -249,12 +291,14 @@ function OrganizationJoinButton({
   name,
   identifier,
   imageFileId,
+  currentUserId,
   synced,
 }: {
   id: string
   name: string
   identifier: string
   imageFileId?: string | undefined
+  currentUserId: string
   synced: boolean
 }) {
   const { data: avatarUrl, isFetching: avatarFetching } = useQuery(
@@ -264,11 +308,24 @@ function OrganizationJoinButton({
     }),
   )
 
+  const onClick = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault()
+      createMembershipAction({
+        action: 'request',
+        organizationId: id,
+        userId: currentUserId,
+      })
+    },
+    [currentUserId, id],
+  )
+
   return (
     <Button
       variant="ghost"
-      className="w-full min-h-12 h-auto rounded-none justify-start gap-6"
+      className="w-full min-h-12 h-auto rounded-none grid grid-cols-[3rem_2fr_1fr_2fr]"
       disabled={!synced}
+      onClick={onClick}
     >
       <Avatar>
         {avatarFetching ? (
@@ -286,13 +343,13 @@ function OrganizationJoinButton({
         )}
       </Avatar>
 
-      <span className="w-full flex-1 py-1 text-start grid grid-cols-2 gap-3 items-end">
-        <h1 className="text-base font-light">{name}</h1>
-        <p className="opacity-20 text-sm font-light">{identifier}</p>
-      </span>
+      <h1 className="text-base font-light text-start text-ellipsis">{name}</h1>
+      <p className="opacity-20 text-sm font-light text-start text-ellipsis">
+        {identifier}
+      </p>
 
-      <span className="flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
-        <p className="text-xs font-light">Join</p>
+      <span className="place-self-end self-center flex gap-1 opacity-0 group-hover/button:opacity-30 transition-opacity">
+        <p className="text-xs font-light">Request</p>
         <Plus />
       </span>
     </Button>

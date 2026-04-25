@@ -99,11 +99,20 @@ export async function addMemberToOrganizationService({
   status: Extract<UserOrgStatus, 'invited' | 'requested' | 'active'>
   prisma: PrismaClient | PrismaTransaction
 }) {
-  return await prisma.userOrganization.create({
-    data: {
+  return await prisma.userOrganization.upsert({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId,
+      },
+    },
+    create: {
       status,
       userId,
       organizationId,
+    },
+    update: {
+      status,
     },
     select: {
       id: true,
